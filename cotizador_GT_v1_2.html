@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotizador GT v1.2 · Gabriel Turner English Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1E3A5F;
+    --primary-light: #93B4D4;
+    --primary-dark: #152C47;
+    --navy: #1a1612;
+    --navy-mid: #292524;
+    --off-white: #FAF8F3;
+    --gray: #6B7280;
+    --gray-light: #9CA3AF;
+    --text: #1F2937;
+    --border: rgba(26,22,18,0.12);
+    --border-mid: rgba(26,22,18,0.25);
+    --green: #16a34a;
+    --green-bg: rgba(22,163,74,0.08);
+    --amber: #D97706;
+    --red: #DC2626;
+    --gold: #1E3A5F;
+    --bg: #F0F4F8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── APP SHELL ── */
+  .app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+  .app-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--primary-dark) 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .app-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(147,180,212,0.3) 0%, transparent 70%);
+  }
+  .brand {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+  .brand span { color: var(--primary-light); }
+  .tagline {
+    color: rgba(255,255,255,0.55);
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .app-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 32px;
+    font-weight: 900;
+    margin-top: 16px;
+    letter-spacing: -0.5px;
+  }
+  .app-title em { color: var(--primary-light); font-style: italic; }
+  .app-sub {
+    color: rgba(255,255,255,0.7);
+    margin-top: 6px;
+    font-size: 14px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: white;
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--primary); }
+  .tab.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 6px rgba(30,58,95,0.35);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── WIZARD STEPS ── */
+  .wizard {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .steps-bar {
+    display: flex;
+    background: var(--off-white);
+    padding: 12px 24px;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--gray);
+    font-weight: 500;
+  }
+  .step-pill .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #E5E7EB;
+    color: var(--gray);
+    font-weight: 700;
+    font-size: 11px;
+  }
+  .step-pill.active { color: var(--primary-dark); font-weight: 700; }
+  .step-pill.active .num { background: var(--primary); color: white; }
+  .step-pill.done .num { background: var(--green); color: white; }
+  .step-pill.done .num::after { content: '✓'; font-size: 12px; }
+  .step-pill.done .num span { display: none; }
+
+  .step {
+    display: none;
+    padding: 28px 32px;
+  }
+  .step.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .step-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .step-sub {
+    color: var(--gray);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  /* ── FORMS ── */
+  .field {
+    margin-bottom: 18px;
+  }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field label .hint {
+    color: var(--gray-light);
+    font-weight: 400;
+    text-transform: none;
+    font-size: 11px;
+    margin-left: 6px;
+    letter-spacing: 0;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field input[type="email"],
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.15s;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .field-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+
+  /* ── RADIO / CHECK CARDS ── */
+  .opt-group { display: grid; gap: 10px; }
+  .opt-group.cols-2 { grid-template-columns: 1fr 1fr; }
+  .opt-group.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .opt {
+    position: relative;
+    cursor: pointer;
+  }
+  .opt input { position: absolute; opacity: 0; }
+  .opt-box {
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .opt:hover .opt-box { border-color: var(--primary-light); }
+  .opt input:checked ~ .opt-box {
+    border-color: var(--primary);
+    background: rgba(30,58,95,0.04);
+    box-shadow: 0 0 0 3px rgba(30,58,95,0.08);
+  }
+  .opt-check {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border-mid);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    position: relative;
+  }
+  .opt[data-type="radio"] .opt-check { border-radius: 50%; }
+  .opt input:checked ~ .opt-box .opt-check {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .opt input:checked ~ .opt-box .opt-check::after {
+    content: '✓';
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .opt[data-type="radio"] input:checked ~ .opt-box .opt-check::after {
+    content: '';
+    width: 6px; height: 6px;
+    background: white;
+    border-radius: 50%;
+  }
+  .opt-label {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .opt-label .desc {
+    display: block;
+    font-size: 12px;
+    color: var(--gray);
+    font-weight: 400;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 11px 22px;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--gray);
+  }
+  .btn-secondary:hover { color: var(--primary); }
+  .btn-ghost {
+    background: var(--off-white);
+    color: var(--navy);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* ── SUMMARY SIDEBAR (step 4) ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .summary-block {
+    background: var(--off-white);
+    border-radius: 12px;
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+  }
+  .summary-block.highlight {
+    background: linear-gradient(135deg, rgba(83,74,183,0.06), rgba(175,169,236,0.08));
+    border: 1.5px solid var(--primary);
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .label { color: var(--gray); }
+  .summary-row .val { color: var(--navy); font-weight: 600; }
+  .summary-row.big {
+    padding: 10px 0;
+    font-size: 15px;
+  }
+  .summary-row.total {
+    border-top: 2px solid var(--primary);
+    padding-top: 12px;
+    margin-top: 6px;
+    border-bottom: none;
+  }
+  .summary-row.total .label {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 16px;
+  }
+  .summary-row.total .val {
+    font-family: 'Playfair Display', serif;
+    color: var(--primary);
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  /* ── HISTORIAL ── */
+  .history-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray);
+  }
+  .history-empty .icon { font-size: 48px; margin-bottom: 12px; }
+  .history-list { display: grid; gap: 10px; }
+  .history-item {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .history-item:hover { border-color: var(--primary-light); transform: translateY(-1px); }
+  .history-item .type-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: rgba(30,58,95,0.1);
+    color: var(--primary-dark);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .history-item .type-tag.p { background: rgba(26,21,53,0.1); color: var(--navy); }
+  .history-item .info { flex: 1; }
+  .history-item .name { font-weight: 600; color: var(--navy); font-size: 14px; }
+  .history-item .meta { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .history-item .price {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 16px;
+  }
+  .history-item .actions { display: flex; gap: 6px; }
+  .history-item .action-btn {
+    padding: 6px 10px;
+    border-radius: 7px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+  }
+  .history-item .action-btn:hover { color: var(--primary); border-color: var(--primary); }
+  .history-item .action-btn.del:hover { color: var(--red); border-color: var(--red); }
+
+  .history-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: white;
+    border-radius: 10px;
+  }
+  .history-controls input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  /* ── GENERATED PROPOSAL PREVIEW ── */
+  .preview-shell {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  .preview-controls {
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: white;
+    align-items: center;
+  }
+  .preview-controls .label {
+    flex: 1;
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+  }
+  .preview-controls .label strong { color: white; }
+  .preview-controls .btn { padding: 8px 14px; font-size: 12px; }
+  .preview-controls .btn-primary { background: var(--primary-light); color: var(--navy); }
+  .preview-controls .btn-primary:hover { background: white; }
+  .preview-controls .btn-ghost { background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2); }
+  .preview-controls .btn-ghost:hover { background: rgba(255,255,255,0.2); color: white; }
+
+  .preview-frame {
+    border: none;
+    width: 100%;
+    height: 75vh;
+  }
+
+  /* ── DANGER / CLEAR ── */
+  .danger-zone {
+    margin-top: 30px;
+    padding: 16px;
+    border: 1px dashed var(--red);
+    border-radius: 10px;
+    background: rgba(220,38,38,0.04);
+  }
+  .danger-zone .title {
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .danger-zone .btn-del {
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .danger-zone .btn-del:hover { background: var(--red); color: white; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .app { padding: 14px 10px 40px; }
+    .app-header { padding: 20px 20px; }
+    .app-title { font-size: 24px; }
+    .step { padding: 20px 18px; }
+    .field-row, .field-row-3 { grid-template-columns: 1fr; }
+    .opt-group.cols-2, .opt-group.cols-3 { grid-template-columns: 1fr; }
+    .steps-bar { overflow-x: auto; white-space: nowrap; }
+    .step-pill { flex-shrink: 0; }
+  }
+
+  /* tiny helpers */
+  .mini-hint {
+    font-size: 12px;
+    color: var(--gray);
+    background: var(--off-white);
+    border-left: 3px solid var(--primary-light);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    line-height: 1.5;
+  }
+  .mini-hint strong { color: var(--primary-dark); }
+
+  .tag-live {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: var(--green-bg);
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+
+  /* ── BACKUP REMINDER BANNER ── */
+  .backup-banner {
+    background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
+    border: 1.5px solid var(--amber);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: slideDown 0.4s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .backup-banner .icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .backup-banner .text {
+    flex: 1;
+    font-size: 13px;
+    color: #78350F;
+    line-height: 1.4;
+  }
+  .backup-banner .text strong { color: #92400E; }
+  .backup-banner .actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .backup-banner button {
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .backup-banner .btn-export-now {
+    background: var(--amber);
+    color: white;
+  }
+  .backup-banner .btn-export-now:hover { background: #B45309; }
+  .backup-banner .btn-dismiss {
+    background: transparent;
+    color: #78350F;
+    border-color: rgba(180,83,9,0.3);
+  }
+  .backup-banner .btn-dismiss:hover { background: rgba(180,83,9,0.1); }
+
+  /* ── INFO TOOLTIP ── */
+  .info-tooltip {
+    display: inline-block;
+    width: 16px; height: 16px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 16px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: help;
+    margin-left: 4px;
+    position: relative;
+  }
+  .info-tooltip:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: var(--navy);
+    color: white;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 10px 14px;
+    border-radius: 8px;
+    width: 280px;
+    text-align: left;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    letter-spacing: 0.2px;
+  }
+  .info-tooltip:hover::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 2px);
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--navy);
+    z-index: 100;
+  }
+
+  /* ── GENERATE BUTTONS ROW ── */
+  .gen-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-pdf-direct {
+    background: var(--green);
+    color: white;
+  }
+  .btn-pdf-direct:hover { background: #15803d; transform: translateY(-1px); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="app-header">
+    <img src="data:image/png;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/2Q==" alt="Gabriel Turner English Training" style="height:52px;filter:invert(1) brightness(2);margin-bottom:16px;display:block;">
+    <div class="app-title">Cotizador <em>inteligente</em></div>
+    <div class="app-sub">Propuestas completas con tácticas aplicadas · HTML, PDF directo y exportación en 2 minutos</div>
+  </div>
+
+  <!-- Backup reminder banner -->
+  <div id="backupBanner" class="backup-banner" style="display:none;">
+    <div class="icon">💾</div>
+    <div class="text">
+      <strong>Hace más de 30 días que no exportas tu historial.</strong><br>
+      Te recomiendo descargar un respaldo para evitar perder cotizaciones si tu navegador se limpia.
+    </div>
+    <div class="actions">
+      <button class="btn-export-now" onclick="exportHistory(); dismissBackupBanner();">Exportar ahora</button>
+      <button class="btn-dismiss" onclick="dismissBackupBanner()">Recordar después</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="cotizar">✎ Nueva cotización</button>
+    <button class="tab" data-tab="historial">🗂 Historial</button>
+    <button class="tab" data-tab="config">⚙ Configuración</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TAB: COTIZAR                                    -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-cotizar">
+    <div class="wizard">
+      <div class="steps-bar">
+        <div class="step-pill active" data-step="1"><span class="num"><span>1</span></span> Prospecto</div>
+        <div class="step-pill" data-step="2"><span class="num"><span>2</span></span> Programa</div>
+        <div class="step-pill" data-step="3"><span class="num"><span>3</span></span> Tácticas</div>
+        <div class="step-pill" data-step="4"><span class="num"><span>4</span></span> Contexto</div>
+        <div class="step-pill" data-step="5"><span class="num"><span>5</span></span> Generar</div>
+      </div>
+
+      <!-- ═══ STEP 1: PROSPECTO ═══ -->
+      <div class="step active" data-step="1">
+        <div class="step-title">Datos del prospecto</div>
+        <div class="step-sub">Información básica para personalizar la propuesta</div>
+
+        <!-- BUSCADOR DE PROSPECTOS DESDE NOTION -->
+        <div class="field" id="prospecto-search-box" style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+          <label style="color:#152C47;font-weight:700;">🔍 Cargar prospecto desde Notion</label>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <input type="text" id="prospecto-search-input" placeholder="Escribe el nombre..." style="flex:1;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-family:inherit;font-size:14px;">
+            <button onclick="buscarProspecto()" style="padding:8px 16px;background:#1E3A5F;color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;">Buscar</button>
+          </div>
+          <div id="prospecto-results" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Nombre del contacto</label>
+            <input type="text" id="contactName" placeholder="Ej. Carlos Rodríguez">
+          </div>
+          <div class="field">
+            <label>Empresa <span class="hint">(opcional para particulares)</span></label>
+            <input type="text" id="company" placeholder="Ej. TechCorp SA de CV">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="contacto@empresa.com">
+          </div>
+          <div class="field">
+            <label>Teléfono / WhatsApp</label>
+            <input type="text" id="phone" placeholder="461 XXX XXXX">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tipo de cliente</label>
+          <div class="opt-group cols-2">
+            <label class="opt" data-type="radio">
+              <input type="radio" name="clientType" value="particular" checked>
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Particular<span class="desc">Persona física paga por su cuenta</span></div></div>
+            </label>
+            <label class="opt" data-type="radio">
+              <input type="radio" name="clientType" value="corporativo">
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Corporativo<span class="desc">Empresa factura y capacita a equipo</span></div></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <div></div>
+          <button class="btn btn-primary" onclick="nextStep()">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 2: PROGRAMA ═══ -->
+      <div class="step" data-step="2">
+        <div class="step-title">Configuración del programa</div>
+        <div class="step-sub">Define modalidad, formato y cantidad de personas</div>
+
+        <div class="field">
+          <label>Modalidad</label>
+          <div class="opt-group cols-3">
+            <label class="opt" data-type="radio">
+              <input type="radio" name="modality" value="online" checked>
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Online<span class="desc">Zoom / Meet</span></div></div>
+            </label>
+            <label class="opt" data-type="radio">
+              <input type="radio" name="modality" value="presencial">
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Presencial<span class="desc">En sitio (empresa o Celaya)</span></div></div>
+            </label>
+            <label class="opt" data-type="radio">
+              <input type="radio" name="modality" value="hibrido">
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Híbrido<span class="desc">Mixto (caso a caso)</span></div></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Número de personas</label>
+            <input type="number" id="numPersonas" value="1" min="1" max="100">
+          </div>
+          <div class="field">
+            <label>Nivel actual</label>
+            <select id="nivel">
+              <option value="no-se">No lo sé (aplicar diagnóstico)</option>
+              <option value="A1">A1 · Básico</option>
+              <option value="A2">A2 · Elemental</option>
+              <option value="B1" selected>B1 · Intermedio</option>
+              <option value="B2">B2 · Intermedio alto</option>
+              <option value="C1">C1 · Avanzado</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Formato: se muestra según tipo de cliente -->
+        <div class="field" id="formatParticular">
+          <label>Formato particular <span class="hint">(puedes elegir más de uno para mostrar opciones en la propuesta)</span></label>
+          <div class="opt-group">
+            <label class="opt" data-type="checkbox">
+              <input type="checkbox" name="formatPart" value="plan-1a1" checked>
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">1 a 1 (Plan Essentials / Progress / Accelerate)<span class="desc">Se ofrecen 3 planes en la propuesta · sistema decoy</span></div></div>
+            </label>
+            <label class="opt" data-type="checkbox">
+              <input type="checkbox" name="formatPart" value="grupo-exclusivo">
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Grupo exclusivo (2-3 personas)<span class="desc">Mismo nivel · matrimonio, amigos, padre-hijo</span></div></div>
+            </label>
+            <label class="opt" data-type="checkbox">
+              <input type="checkbox" name="formatPart" value="grupal-abierta">
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Grupal abierta<span class="desc">$790 MXN/persona/mes · 2 sesiones/semana</span></div></div>
+            </label>
+            <label class="opt" data-type="checkbox">
+              <input type="checkbox" name="formatPart" value="sabatino">
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Sabatino presencial Celaya<span class="desc">$1,290 MXN/mes · sábados 8:30-11:30 am</span></div></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field" id="formatCorporativo" style="display:none;">
+          <label>Formato corporativo <span class="hint">(se autocalcula por número de personas)</span></label>
+          <div id="autoFormatInfo" class="mini-hint"></div>
+
+          <!-- Para 4-6 personas: elegir exclusivo vs abierto -->
+          <div id="choice4to6" style="display:none;">
+            <div class="opt-group cols-2" style="margin-top:10px;">
+              <label class="opt" data-type="radio">
+                <input type="radio" name="choice46" value="exclusivo" checked>
+                <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Grupo exclusivo<span class="desc">No se mezclan con otros alumnos</span></div></div>
+              </label>
+              <label class="opt" data-type="radio">
+                <input type="radio" name="choice46" value="abierto">
+                <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Grupo abierto<span class="desc">$990/pers · mezclados</span></div></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zona si es presencial corporativo -->
+        <div class="field" id="zonaField" style="display:none;">
+          <label>Zona de la empresa <span class="hint">(fee mensual de traslado)</span></label>
+          <select id="zona">
+            <option value="0">Zona 0 · Celaya ($0)</option>
+            <option value="1">Zona 1 · Bajío cercano (Salamanca, Cortazar, Comonfort) · $1,500/mes</option>
+            <option value="2">Zona 2 · Bajío extendido (Irapuato, Silao, León, Guanajuato) · $2,500/mes</option>
+            <option value="3">Zona 3 · Querétaro y zona metropolitana · $3,500/mes</option>
+            <option value="4">Zona 4 · CDMX &amp; Toluca · $8,000/mes</option>
+            <option value="5">Zona 5 · Resto República · Cotización especial</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Duración del programa <span class="hint">(en meses)</span></label>
+          <select id="duracion">
+            <option value="3">3 meses (ciclo corto)</option>
+            <option value="5" selected>5 meses (1 nivel completo · estándar)</option>
+            <option value="10">10 meses (2 niveles)</option>
+            <option value="12">12 meses (ciclo anual)</option>
+          </select>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="prevStep()">← Atrás</button>
+          <button class="btn btn-primary" onclick="nextStep()">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 3: TÁCTICAS ═══ -->
+      <div class="step" data-step="3">
+        <div class="step-title">Tácticas comerciales</div>
+        <div class="step-sub">Activa las estrategias que aplicarán en esta propuesta</div>
+
+        <div class="field">
+          <div class="opt-group">
+            <label class="opt">
+              <input type="checkbox" id="tactValueStack" checked>
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Value Stack cuantificado <span class="info-tooltip" data-tip="Muestra con precios tachados todo lo que incluyes sin costo (diagnóstico, material, plataforma, reportes). Cambia la percepción del precio total sin costo adicional para ti.">?</span><span class="desc">Muestra el valor tachado de lo que incluyes gratis</span></div></div>
+            </label>
+            <label class="opt" id="tactAnclaWrapper">
+              <input type="checkbox" id="tactAncla">
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Precio ancla (+25%) <span class="info-tooltip" data-tip="Muestra tu tarifa de lista tachada junto al precio que estás ofreciendo. El cliente percibe un descuento del 25% aunque el precio real es el mismo que siempre. Se activa automáticamente en corporativos; no aplica en particulares.">?</span><span class="desc" id="anclaDesc">Se activa automáticamente en corporativos</span></div></div>
+            </label>
+            <label class="opt">
+              <input type="checkbox" id="tactCiclo" checked>
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Precio Ciclo Completo (−8%) <span class="info-tooltip" data-tip="Ofrece una alternativa al pago mensual con 8% de descuento si el alumno se compromete al ciclo completo. Sin penalización si cancela — solo ajuste retroactivo al precio normal.">?</span><span class="desc">Alternativa con descuento por compromiso</span></div></div>
+            </label>
+            <label class="opt">
+              <input type="checkbox" id="tactUrgencia" checked>
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Urgencia con fecha <span class="info-tooltip" data-tip="Agrega vigencia con fecha calculada automáticamente y un mensaje de urgencia honesta (cupo por maestro, ajuste trimestral, o inicio de ciclo).">?</span><span class="desc">Vigencia con fecha automática</span></div></div>
+            </label>
+            <label class="opt">
+              <input type="checkbox" id="tactIncentivo" checked>
+              <div class="opt-box"><div class="opt-check"></div><div class="opt-label">Incentivo por firma rápida <span class="info-tooltip" data-tip="Regala algo si el cliente firma en los primeros 7 días (clase bonus, diagnóstico extendido, material adicional). Impacto en percepción: muy alto.">?</span><span class="desc">Inscripción / clase bonus si firma en 7 días</span></div></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field" id="urgencyTypeField">
+          <label>Tipo de urgencia</label>
+          <select id="urgencyType">
+            <option value="ciclo">Inicio de ciclo (próximo arranque)</option>
+            <option value="cupo">Cupo por maestro (disponibilidad)</option>
+            <option value="trimestre">Ajuste de trimestre (precios 2026)</option>
+          </select>
+        </div>
+
+        <div class="field" id="incentivoField">
+          <label>Incentivo si firma rápido</label>
+          <select id="incentivoType">
+            <option value="diagnostico">Diagnóstico extendido 1:1 con Gabriel</option>
+            <option value="bonus">Clase bonus mensual (tema libre)</option>
+            <option value="material">Material extendido Business English</option>
+          </select>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="prevStep()">← Atrás</button>
+          <button class="btn btn-primary" onclick="nextStep()">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 4: CONTEXTO ═══ -->
+      <div class="step" data-step="4">
+        <div class="step-title">Contexto del prospecto</div>
+        <div class="step-sub">Estos textos se integrarán en la propuesta para personalizarla</div>
+
+        <div class="field">
+          <label>Meta principal / por qué quiere aprender inglés</label>
+          <textarea id="metaPrincipal" placeholder="Ej: Necesita comunicarse con clientes en EE.UU. para cerrar ventas internacionales..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Desafío 1 <span class="hint">(qué le cuesta hoy)</span></label>
+          <textarea id="desafio1" placeholder="Ej: Entiende lectura técnica pero se bloquea al hablar en reuniones..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Desafío 2 <span class="hint">(qué consecuencia tiene no resolverlo)</span></label>
+          <textarea id="desafio2" placeholder="Ej: Depende de otros para llamadas importantes, lo que limita su crecimiento..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Sector / industria <span class="hint">(personaliza vocabulario)</span></label>
+          <input type="text" id="sector" placeholder="Ej: Automotriz, TI, Finanzas, Logística">
+        </div>
+
+        <div class="field">
+          <label>Horario preferido <span class="hint">(opcional)</span></label>
+          <input type="text" id="horario" placeholder="Ej: Lunes y miércoles 7:00 pm">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="prevStep()">← Atrás</button>
+          <button class="btn btn-primary" onclick="nextStep()">Ver resumen →</button>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 5: GENERAR ═══ -->
+      <div class="step" data-step="5">
+        <div class="step-title">Resumen y generación</div>
+        <div class="step-sub">Revisa el cálculo y genera la propuesta</div>
+
+        <div class="summary-grid">
+          <div class="summary-block highlight">
+            <div id="summaryBody"></div>
+          </div>
+          <div class="summary-block">
+            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray); font-weight:700; margin-bottom:8px;">Qué se incluirá</div>
+            <div id="summaryTactics"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="prevStep()">← Atrás</button>
+          <div class="gen-buttons">
+            <button class="btn btn-ghost" onclick="saveAndReset()">💾 Guardar y nueva</button>
+            <button class="btn btn-primary" onclick="generate(false)">📄 Generar HTML</button>
+            <button class="btn btn-pdf-direct" onclick="generate(true)">🖨 Generar PDF directo</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TAB: HISTORIAL                                  -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-historial">
+    <div class="history-controls">
+      <input type="text" id="historySearch" placeholder="🔍 Buscar por nombre o empresa...">
+      <button class="btn btn-ghost" onclick="exportHistory()">📤 Exportar JSON</button>
+      <button class="btn btn-ghost" onclick="exportHistoryCSV()">📊 Exportar CSV</button>
+      <button class="btn btn-ghost" onclick="importHistory()">📥 Importar</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(event)">
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TAB: CONFIGURACIÓN                              -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-config">
+    <div class="wizard" style="padding: 28px 32px;">
+      <div class="step-title">Configuración</div>
+      <div class="step-sub">Ajustes globales del cotizador</div>
+
+      <div class="field">
+        <label>Porcentaje de descuento Ciclo Completo</label>
+        <input type="number" id="cicloDiscount" value="8" min="0" max="20" step="1">
+        <div class="mini-hint">Default: 8%. No bajar de 5% ni subir de 12%.</div>
+      </div>
+
+      <div class="field">
+        <label>Porcentaje de precio ancla</label>
+        <input type="number" id="anclaMarkup" value="25" min="15" max="40" step="1">
+        <div class="mini-hint">Default: 25%. El ancla debe estar entre 20-30% arriba del precio real.</div>
+      </div>
+
+      <div class="btn-row">
+        <div></div>
+        <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar configuración</button>
+      </div>
+
+      <div class="danger-zone">
+        <div class="title">⚠ Zona peligrosa</div>
+        <p style="font-size:13px; color:var(--gray); margin-bottom:10px;">Eliminar todo el historial de cotizaciones. Esta acción no se puede deshacer a menos que hayas exportado previamente.</p>
+        <button class="btn-del" onclick="clearAllHistory()">Borrar todo el historial</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- MOTOR JAVASCRIPT                                   -->
+<!-- ══════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ────────────────────────────────────────────────────
+// TABULADOR v2 — fuente única de verdad
+// ────────────────────────────────────────────────────
+const TABULADOR = {
+  particular: {
+    plan1a1: {
+      essentials: 1290,
+      progress: 2090,
+      accelerate: 2990
+    },
+    grupoExclusivo2: 3400,
+    grupoExclusivo3: 3900,
+    grupalAbierta: 790,
+    sabatino: 1290,
+    inscripcionOnline: 450,
+    inscripcionSabatino: 600
+  },
+  corporativo: {
+    unoAUno: 2490,
+    grupo2: 4490,
+    grupo3: 4090,
+    grupo4: 1100,   // por persona, grupo cerrado
+    grupo5: 1060,
+    grupo6: 1000,
+    grupoAbierto4a6: 990,
+    grupo7a10: 890,
+    grupo11a20: 790,
+    grupo21mas: 720,
+    presencialMarkup: 0.20,
+    feeTraslado: {
+      0: 0, 1: 1500, 2: 2500, 3: 3500, 4: 8000, 5: 0
+    },
+    feeTrasladoLabel: {
+      0: 'Celaya', 1: 'Bajío cercano',
+      2: 'Bajío extendido', 3: 'Querétaro',
+      4: 'CDMX & Toluca', 5: 'Cotización especial'
+    }
+  },
+  valoresIncluidos: {
+    diagnostico: 350,
+    material: 450,
+    plataformaMes: 1200,
+    reporteMensualPersona: 200
+  }
+};
+
+const CONFIG_DEFAULTS = {
+  cicloDiscount: 8,
+  anclaMarkup: 25,
+  nextCycleDate: getNextMondayIn14Days()
+};
+
+function getNextMondayIn14Days() {
+  const d = new Date();
+  d.setDate(d.getDate() + 14);
+  while (d.getDay() !== 1) d.setDate(d.getDate() + 1);
+  return d.toISOString().split('T')[0];
+}
+
+// ────────────────────────────────────────────────────
+// ESTADO GLOBAL
+// ────────────────────────────────────────────────────
+let currentStep = 1;
+let state = {};
+
+// ────────────────────────────────────────────────────
+// NAVEGACIÓN WIZARD
+// ────────────────────────────────────────────────────
+function goToStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
+  document.querySelectorAll('.step-pill').forEach(p => {
+    const num = parseInt(p.dataset.step);
+    p.classList.remove('active', 'done');
+    if (num === n) p.classList.add('active');
+    else if (num < n) p.classList.add('done');
+  });
+  if (n === 5) buildSummary();
+  if (n === 2) updateFormatVisibility();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function nextStep() { if (currentStep < 5) goToStep(currentStep + 1); }
+function prevStep() { if (currentStep > 1) goToStep(currentStep - 1); }
+
+// ────────────────────────────────────────────────────
+// TABS
+// ────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+    if (tab.dataset.tab === 'historial') renderHistory();
+    if (tab.dataset.tab === 'config') loadConfigUI();
+  });
+});
+
+// ────────────────────────────────────────────────────
+// RENDER CONDICIONAL (particular vs corporativo, presencial, etc.)
+// ────────────────────────────────────────────────────
+document.querySelectorAll('input[name="clientType"]').forEach(r => {
+  r.addEventListener('change', () => {
+    updateFormatVisibility();
+    updateAnclaDefault();
+  });
+});
+document.querySelectorAll('input[name="modality"]').forEach(r => {
+  r.addEventListener('change', updateFormatVisibility);
+});
+document.getElementById('numPersonas').addEventListener('input', updateFormatVisibility);
+
+// Auto-activar ancla si es corporativo, desactivar si es particular
+function updateAnclaDefault() {
+  const clientType = document.querySelector('input[name="clientType"]:checked').value;
+  const ancla = document.getElementById('tactAncla');
+  const anclaWrapper = document.getElementById('tactAnclaWrapper');
+  const anclaDesc = document.getElementById('anclaDesc');
+  if (clientType === 'corporativo') {
+    ancla.checked = true;
+    ancla.disabled = false;
+    anclaWrapper.style.opacity = '1';
+    anclaDesc.textContent = 'Activado — muestra tarifa de lista tachada';
+  } else {
+    ancla.checked = false;
+    ancla.disabled = true;
+    anclaWrapper.style.opacity = '0.5';
+    anclaDesc.textContent = 'No aplica en particulares (se usa sistema decoy)';
+  }
+}
+
+function updateFormatVisibility() {
+  const clientType = document.querySelector('input[name="clientType"]:checked').value;
+  const modality = document.querySelector('input[name="modality"]:checked').value;
+  const numPersonas = parseInt(document.getElementById('numPersonas').value) || 1;
+
+  document.getElementById('formatParticular').style.display = (clientType === 'particular') ? '' : 'none';
+  document.getElementById('formatCorporativo').style.display = (clientType === 'corporativo') ? '' : 'none';
+  document.getElementById('zonaField').style.display =
+    (clientType === 'corporativo' && (modality === 'presencial' || modality === 'hibrido')) ? '' : 'none';
+
+  if (clientType === 'corporativo') {
+    const info = document.getElementById('autoFormatInfo');
+    const choice4to6 = document.getElementById('choice4to6');
+    let label = '';
+    if (numPersonas === 1) label = '<strong>1 a 1 corporativo</strong> · $2,490/mes +IVA';
+    else if (numPersonas === 2) label = '<strong>Grupo exclusivo de 2</strong> · $4,490/mes/grupo +IVA';
+    else if (numPersonas === 3) label = '<strong>Grupo exclusivo de 3</strong> · $4,090/mes/grupo +IVA';
+    else if (numPersonas >= 4 && numPersonas <= 6) label = `<strong>Grupo de ${numPersonas}</strong> · elige formato abajo`;
+    else if (numPersonas >= 7 && numPersonas <= 10) label = `<strong>Grupo exclusivo 7-10</strong> · $890/persona/mes +IVA`;
+    else if (numPersonas >= 11 && numPersonas <= 20) label = `<strong>Grupos por nivel 11-20</strong> · $790/persona/mes +IVA`;
+    else if (numPersonas >= 21) label = `<strong>Volumen 21+</strong> · $720/persona/mes +IVA`;
+    info.innerHTML = label;
+    choice4to6.style.display = (numPersonas >= 4 && numPersonas <= 6) ? '' : 'none';
+  }
+}
+
+// ────────────────────────────────────────────────────
+// RECOLECCIÓN DE DATOS DEL FORMULARIO
+// ────────────────────────────────────────────────────
+function collectState() {
+  const s = {
+    contactName: document.getElementById('contactName').value.trim(),
+    company: document.getElementById('company').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    clientType: document.querySelector('input[name="clientType"]:checked').value,
+    modality: document.querySelector('input[name="modality"]:checked').value,
+    numPersonas: parseInt(document.getElementById('numPersonas').value) || 1,
+    nivel: document.getElementById('nivel').value,
+    duracion: parseInt(document.getElementById('duracion').value),
+    formatPart: Array.from(document.querySelectorAll('input[name="formatPart"]:checked')).map(i=>i.value).join(',') || 'plan-1a1',
+    choice46: document.querySelector('input[name="choice46"]:checked')?.value || 'exclusivo',
+    zona: document.getElementById('zona').value,
+    // tácticas
+    tactValueStack: document.getElementById('tactValueStack').checked,
+    tactAncla: document.getElementById('tactAncla').checked,
+    tactCiclo: document.getElementById('tactCiclo').checked,
+    tactUrgencia: document.getElementById('tactUrgencia').checked,
+    tactIncentivo: document.getElementById('tactIncentivo').checked,
+    urgencyType: document.getElementById('urgencyType').value,
+    incentivoType: document.getElementById('incentivoType').value,
+    // contexto
+    metaPrincipal: document.getElementById('metaPrincipal').value.trim(),
+    desafio1: document.getElementById('desafio1').value.trim(),
+    desafio2: document.getElementById('desafio2').value.trim(),
+    sector: document.getElementById('sector').value.trim(),
+    horario: document.getElementById('horario').value.trim(),
+    // metadata
+    createdAt: new Date().toISOString()
+  };
+  return s;
+}
+
+// ────────────────────────────────────────────────────
+// CÁLCULO DE PRECIO — corazón del cotizador
+// ────────────────────────────────────────────────────
+function calculatePricing(s) {
+  const cfg = loadConfig();
+  const result = {
+    modality: s.modality,
+    clientType: s.clientType,
+    numPersonas: s.numPersonas,
+    duracion: s.duracion,
+    precioMensual: 0,
+    precioTotalGrupo: 0,
+    isGroupPrice: false,
+    formato: '',
+    inscripcion: 0,
+    feeTraslado: 0,
+    hasIVA: false,
+    // planes 1a1 particular
+    planEssentials: null,
+    planProgress: null,
+    planAccelerate: null,
+    // tácticas calculadas
+    precioAncla: 0,
+    precioCiclo: 0,
+    valueStack: []
+  };
+
+  // ── PARTICULAR ──
+  if (s.clientType === 'particular') {
+    if (s.formatPart === 'plan-1a1') {
+      result.formato = '1 a 1 · Plan con 3 intensidades';
+      result.planEssentials = TABULADOR.particular.plan1a1.essentials;
+      result.planProgress = TABULADOR.particular.plan1a1.progress;
+      result.planAccelerate = TABULADOR.particular.plan1a1.accelerate;
+      result.precioMensual = result.planProgress; // default es el recomendado
+      result.inscripcion = TABULADOR.particular.inscripcionOnline;
+    } else if (s.formatPart === 'grupo-exclusivo') {
+      if (s.numPersonas === 2) {
+        result.formato = 'Grupo exclusivo de 2';
+        result.precioMensual = TABULADOR.particular.grupoExclusivo2;
+        result.isGroupPrice = true;
+      } else {
+        result.formato = 'Grupo exclusivo de 3';
+        result.precioMensual = TABULADOR.particular.grupoExclusivo3;
+        result.isGroupPrice = true;
+      }
+      result.inscripcion = TABULADOR.particular.inscripcionOnline;
+    } else if (s.formatPart === 'grupal-abierta') {
+      result.formato = 'Grupal abierta · 2 sesiones/semana';
+      result.precioMensual = TABULADOR.particular.grupalAbierta;
+      result.inscripcion = TABULADOR.particular.inscripcionOnline;
+    } else if (s.formatPart === 'sabatino') {
+      result.formato = 'Sabatino presencial Celaya · sábados 8:30-11:30';
+      result.precioMensual = TABULADOR.particular.sabatino;
+      result.inscripcion = TABULADOR.particular.inscripcionSabatino;
+    }
+  }
+
+  // ── CORPORATIVO ──
+  if (s.clientType === 'corporativo') {
+    result.hasIVA = true;
+    const n = s.numPersonas;
+    let basePerPerson = 0;
+    let isPerPerson = true;
+    let flat = 0;
+
+    if (n === 1) { flat = TABULADOR.corporativo.unoAUno; isPerPerson = false; result.formato = 'Corporativo 1 a 1'; }
+    else if (n === 2) { flat = TABULADOR.corporativo.grupo2; isPerPerson = false; result.formato = 'Corporativo grupo exclusivo de 2'; }
+    else if (n === 3) { flat = TABULADOR.corporativo.grupo3; isPerPerson = false; result.formato = 'Corporativo grupo exclusivo de 3'; }
+    else if (n === 4) {
+      if (s.choice46 === 'abierto') { basePerPerson = TABULADOR.corporativo.grupoAbierto4a6; result.formato = 'Corporativo grupo abierto de 4'; }
+      else { basePerPerson = TABULADOR.corporativo.grupo4; result.formato = 'Corporativo grupo exclusivo de 4'; }
+    }
+    else if (n === 5) {
+      if (s.choice46 === 'abierto') { basePerPerson = TABULADOR.corporativo.grupoAbierto4a6; result.formato = 'Corporativo grupo abierto de 5'; }
+      else { basePerPerson = TABULADOR.corporativo.grupo5; result.formato = 'Corporativo grupo exclusivo de 5'; }
+    }
+    else if (n === 6) {
+      if (s.choice46 === 'abierto') { basePerPerson = TABULADOR.corporativo.grupoAbierto4a6; result.formato = 'Corporativo grupo abierto de 6'; }
+      else { basePerPerson = TABULADOR.corporativo.grupo6; result.formato = 'Corporativo grupo exclusivo de 6'; }
+    }
+    else if (n >= 7 && n <= 10) { basePerPerson = TABULADOR.corporativo.grupo7a10; result.formato = `Corporativo grupo exclusivo 7-10 (${n} personas)`; }
+    else if (n >= 11 && n <= 20) { basePerPerson = TABULADOR.corporativo.grupo11a20; result.formato = `Corporativo grupos por nivel (${n} personas)`; }
+    else { basePerPerson = TABULADOR.corporativo.grupo21mas; result.formato = `Corporativo volumen 21+ (${n} personas)`; }
+
+    if (isPerPerson) {
+      result.precioMensual = basePerPerson;
+      result.precioTotalGrupo = basePerPerson * n;
+    } else {
+      result.precioMensual = flat;
+      result.precioTotalGrupo = flat;
+      result.isGroupPrice = true;
+    }
+
+    // Presencial corporativo: +20% + fee de traslado
+    if (s.modality === 'presencial' || s.modality === 'hibrido') {
+      const markup = TABULADOR.corporativo.presencialMarkup;
+      if (isPerPerson) {
+        result.precioMensual = Math.round(basePerPerson * (1 + markup));
+        result.precioTotalGrupo = result.precioMensual * n;
+      } else {
+        result.precioMensual = Math.round(flat * (1 + markup));
+        result.precioTotalGrupo = result.precioMensual;
+      }
+      result.feeTraslado = TABULADOR.corporativo.feeTraslado[s.zona] || 0;
+    }
+  }
+
+  // ── Value Stack ──
+  if (s.clientType === 'corporativo') {
+    result.valueStack = [
+      { item: `Diagnóstico de nivel por colaborador (${s.numPersonas} × $${TABULADOR.valoresIncluidos.diagnostico})`, amount: TABULADOR.valoresIncluidos.diagnostico * s.numPersonas },
+      { item: `Material de trabajo propio (${s.numPersonas} × $${TABULADOR.valoresIncluidos.material})`, amount: TABULADOR.valoresIncluidos.material * s.numPersonas },
+      { item: `Plataforma de seguimiento (${s.duracion} meses × $${TABULADOR.valoresIncluidos.plataformaMes})`, amount: TABULADOR.valoresIncluidos.plataformaMes * s.duracion },
+      { item: `Reportes mensuales por colaborador (${s.numPersonas} pers × ${s.duracion} meses × $${TABULADOR.valoresIncluidos.reporteMensualPersona})`, amount: TABULADOR.valoresIncluidos.reporteMensualPersona * s.numPersonas * s.duracion },
+      { item: `Sin inscripción (valor: ${s.numPersonas} × $450)`, amount: 450 * s.numPersonas }
+    ];
+  } else {
+    result.valueStack = [
+      { item: 'Diagnóstico de nivel inicial', amount: TABULADOR.valoresIncluidos.diagnostico },
+      { item: `Material de trabajo propio`, amount: TABULADOR.valoresIncluidos.material },
+      { item: `Plataforma de seguimiento (${s.duracion} meses)`, amount: TABULADOR.valoresIncluidos.plataformaMes * s.duracion }
+    ];
+  }
+  result.valueStackTotal = result.valueStack.reduce((sum, v) => sum + v.amount, 0);
+
+  // ── Ancla ──
+  const baseToAnchor = result.precioTotalGrupo || result.precioMensual;
+  result.precioAncla = Math.round(baseToAnchor * (1 + cfg.anclaMarkup / 100));
+
+  // ── Ciclo completo (−X%) ──
+  result.precioCiclo = Math.round(result.precioMensual * (1 - cfg.cicloDiscount / 100));
+  if (result.planEssentials) {
+    result.planEssentialsCiclo = Math.round(result.planEssentials * (1 - cfg.cicloDiscount / 100));
+    result.planProgressCiclo = Math.round(result.planProgress * (1 - cfg.cicloDiscount / 100));
+    result.planAccelerateCiclo = Math.round(result.planAccelerate * (1 - cfg.cicloDiscount / 100));
+  }
+
+  return result;
+}
+
+// ────────────────────────────────────────────────────
+// RESUMEN (Step 5)
+// ────────────────────────────────────────────────────
+function buildSummary() {
+  state = collectState();
+  const p = calculatePricing(state);
+  const cfg = loadConfig();
+
+  let html = `<div class="summary-row big"><span class="label">Prospecto</span><span class="val">${state.contactName || '—'}</span></div>`;
+  if (state.company) html += `<div class="summary-row"><span class="label">Empresa</span><span class="val">${state.company}</span></div>`;
+  html += `<div class="summary-row"><span class="label">Tipo</span><span class="val">${state.clientType === 'corporativo' ? 'Corporativo' : 'Particular'}</span></div>`;
+  html += `<div class="summary-row"><span class="label">Modalidad</span><span class="val">${capitalize(state.modality)}</span></div>`;
+  html += `<div class="summary-row"><span class="label">Formato</span><span class="val">${p.formato}</span></div>`;
+  html += `<div class="summary-row"><span class="label">Personas · duración</span><span class="val">${state.numPersonas} · ${state.duracion} meses</span></div>`;
+
+  if (p.planEssentials) {
+    html += `<div class="summary-row"><span class="label">Planes a ofrecer</span><span class="val">Essentials $${fmt(p.planEssentials)} / Progress $${fmt(p.planProgress)} / Accelerate $${fmt(p.planAccelerate)}</span></div>`;
+  } else {
+    const lbl = p.isGroupPrice ? 'Precio grupo/mes' : 'Precio por persona/mes';
+    html += `<div class="summary-row"><span class="label">${lbl}</span><span class="val">$${fmt(p.precioMensual)}${p.hasIVA ? ' +IVA' : ''}</span></div>`;
+    if (!p.isGroupPrice && state.numPersonas > 1) {
+      html += `<div class="summary-row"><span class="label">Total grupo/mes</span><span class="val">$${fmt(p.precioTotalGrupo)}${p.hasIVA ? ' +IVA' : ''}</span></div>`;
+    }
+  }
+
+  if (p.feeTraslado > 0) {
+    html += `<div class="summary-row"><span class="label">Fee traslado · ${TABULADOR.corporativo.feeTrasladoLabel[state.zona]}</span><span class="val">$${fmt(p.feeTraslado)}/mes</span></div>`;
+  }
+  if (p.inscripcion > 0) {
+    html += `<div class="summary-row"><span class="label">Inscripción anual</span><span class="val">$${fmt(p.inscripcion)}</span></div>`;
+  }
+
+  if (state.tactAncla && !p.planEssentials) {
+    html += `<div class="summary-row"><span class="label">Precio ancla (lista)</span><span class="val" style="color:var(--gold);">$${fmt(p.precioAncla)}/mes</span></div>`;
+  }
+  if (state.tactCiclo && !p.planEssentials) {
+    html += `<div class="summary-row"><span class="label">Ciclo Completo (−${cfg.cicloDiscount}%)</span><span class="val" style="color:var(--green);">$${fmt(p.precioCiclo)}/mes</span></div>`;
+  }
+  if (state.tactValueStack) {
+    html += `<div class="summary-row"><span class="label">Value Stack</span><span class="val" style="color:var(--green);">$${fmt(p.valueStackTotal)} regalados</span></div>`;
+  }
+
+  const totalBase = p.isGroupPrice ? p.precioMensual : p.precioTotalGrupo;
+  html += `<div class="summary-row total"><span class="label">Mensual a cobrar${p.hasIVA ? ' (sin IVA)' : ''}</span><span class="val">$${fmt(totalBase + (p.feeTraslado || 0))}</span></div>`;
+
+  document.getElementById('summaryBody').innerHTML = html;
+
+  // Tactics summary
+  const tactics = [];
+  if (state.tactValueStack) tactics.push(`✓ Value Stack cuantificado ($${fmt(p.valueStackTotal)})`);
+  if (state.tactAncla) tactics.push(`✓ Precio ancla +${cfg.anclaMarkup}%`);
+  if (state.tactCiclo) tactics.push(`✓ Precio Ciclo Completo (−${cfg.cicloDiscount}%)`);
+  if (state.tactUrgencia) tactics.push(`✓ Urgencia: ${urgencyLabel(state.urgencyType)}`);
+  if (state.tactIncentivo) tactics.push(`✓ Incentivo: ${incentivoLabel(state.incentivoType)}`);
+  if (!tactics.length) tactics.push('<em style="color:var(--gray)">Ninguna táctica activada</em>');
+  document.getElementById('summaryTactics').innerHTML = tactics.map(t => `<div style="padding:4px 0; font-size:13px;">${t}</div>`).join('');
+}
+
+function urgencyLabel(t) {
+  return { 'ciclo': 'Inicio de ciclo', 'cupo': 'Cupo por maestro', 'trimestre': 'Ajuste trimestral' }[t];
+}
+function incentivoLabel(t) {
+  return {
+    'inscripcion': '',  // eliminado
+    'diagnostico': 'Diagnóstico 1:1 con Gabriel',
+    'bonus': 'Clase bonus mensual',
+    'material': 'Material extendido'
+  }[t];
+}
+function fmt(n) { return (Math.round(n) || 0).toLocaleString('es-MX'); }
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+
+// ────────────────────────────────────────────────────
+// INTEGRACIÓN: NOTION + GMAIL via Claude API
+// ────────────────────────────────────────────────────
+async function sendLeadToNotionAndEmail(s, p) {
+  const tacticas = [
+    s.tactValueStack ? 'Value Stack' : null,
+    s.tactAncla ? 'Precio ancla' : null,
+    s.tactUrgencia ? 'Urgencia (' + s.urgencyType + ')' : null,
+    s.tactIncentivo ? 'Incentivo (' + s.incentivoType + ')' : null,
+  ].filter(Boolean).join(', ') || 'Ninguna';
+  const precioMensual = p.precioMensualTotal || p.precioMensual || 0;
+  const tipo      = s.clientType === 'corporativo' ? 'Corporativo' : 'Particular';
+  const modalidad = s.modality === 'online' ? 'Online' : s.modality === 'presencial' ? 'Presencial' : 'Híbrido';
+  try {
+    const res = await fetch('https://gt-portal-worker.gabriel32turner.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'saveLead',
+        data: {
+          nombre: s.contactName || '', empresa: s.company || '',
+          telefono: s.phone || '', email: s.email || '',
+          tipo_cliente: tipo, modalidad: modalidad,
+          personas: s.numPersonas || 1, precio_cotizado: precioMensual,
+          tacticas: tacticas, nivel: s.nivel || '', duracion: s.duracion || '',
+        }
+      }),
+    });
+    const json = await res.json();
+    if (json.ok) { showIntegrationStatus('✓ Lead guardado en Notion', 'success'); }
+    else { showIntegrationStatus('⚠ Error: ' + json.error, 'warning'); }
+  } catch(e) { showIntegrationStatus('⚠ Sin conexión con el servidor', 'warning'); }
+}
+
+function showIntegrationStatus(msg, type) {
+  const existing = document.getElementById('integration-status');
+  if (existing) existing.remove();
+  
+  const el = document.createElement('div');
+  el.id = 'integration-status';
+  el.style.cssText = `
+    position: fixed; bottom: 24px; right: 24px;
+    background: ${type === 'success' ? '#1a1612' : '#92400e'};
+    color: ${type === 'success' ? '#faf8f3' : '#fef3c7'};
+    padding: 12px 20px; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    z-index: 9999; animation: slideUp 0.3s ease;
+  `;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+// ────────────────────────────────────────────────────
+// GENERAR PROPUESTA HTML
+// ────────────────────────────────────────────────────
+function generate(pdfMode = false) {
+  state = collectState();
+  if (!state.contactName) {
+    alert('Agrega al menos el nombre del prospecto antes de generar.');
+    goToStep(1);
+    return;
+  }
+  const pricing = calculatePricing(state);
+  const proposalHTML = buildProposalHTML(state, pricing, pdfMode);
+  saveToHistory(state, pricing);
+
+  // ── INTEGRACIÓN: Guardar en Notion + Enviar Gmail ──
+  sendLeadToNotionAndEmail(state, pricing);
+
+  // Abrir en nueva ventana
+  const win = window.open('', '_blank');
+  win.document.write(proposalHTML);
+  win.document.close();
+
+  // Si es modo PDF directo, dispara la impresión automáticamente
+  if (pdfMode) {
+    // Esperamos a que carguen las fuentes y estilos
+    win.addEventListener('load', () => {
+      setTimeout(() => {
+        win.print();
+      }, 600);
+    });
+  }
+}
+
+function saveAndReset() {
+  state = collectState();
+  if (state.contactName) {
+    const pricing = calculatePricing(state);
+    saveToHistory(state, pricing);
+  }
+  resetForm();
+}
+
+function resetForm() {
+  document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], textarea').forEach(el => {
+    if (el.id === 'numPersonas') el.value = '1';
+    else if (el.id === 'cicloDiscount' || el.id === 'anclaMarkup') return;
+    else el.value = '';
+  });
+  document.querySelectorAll('select').forEach(s => { if (s.id !== 'nivel' && s.id !== 'duracion') s.selectedIndex = 0; });
+  document.getElementById('nivel').value = 'B1';
+  document.getElementById('duracion').value = '5';
+  // radios defaults
+  document.querySelector('input[name="clientType"][value="particular"]').checked = true;
+  document.querySelector('input[name="modality"][value="online"]').checked = true;
+  document.querySelectorAll('input[name="formatPart"]').forEach(i => i.checked = false); const def = document.querySelector('input[name="formatPart"][value="plan-1a1"]'); if(def) def.checked = true;
+  // tácticas: las 4 que siempre van + el ancla condicional
+  ['tactValueStack', 'tactCiclo', 'tactUrgencia', 'tactIncentivo'].forEach(id => {
+    document.getElementById(id).checked = true;
+  });
+  updateFormatVisibility();
+  updateAnclaDefault();
+  goToStep(1);
+}
+
+// ────────────────────────────────────────────────────
+// STORAGE (localStorage + exportable)
+// ────────────────────────────────────────────────────
+const STORAGE_KEY = 'gt_cotizaciones_v1';
+const CONFIG_KEY = 'gt_config_v1';
+
+function loadConfig() {
+  const raw = localStorage.getItem(CONFIG_KEY);
+  if (!raw) return { ...CONFIG_DEFAULTS };
+  try { return { ...CONFIG_DEFAULTS, ...JSON.parse(raw) }; }
+  catch (e) { return { ...CONFIG_DEFAULTS }; }
+}
+
+function saveConfig() {
+  const ndEl = document.getElementById('nextCycleDate');
+  const cfg = {
+    cicloDiscount: parseInt(document.getElementById('cicloDiscount').value) || 8,
+    anclaMarkup: parseInt(document.getElementById('anclaMarkup').value) || 25,
+    nextCycleDate: ndEl ? (ndEl.value || getNextMondayIn14Days()) : getNextMondayIn14Days()
+  };
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+  alert('Configuración guardada.');
+}
+
+function loadConfigUI() {
+  const cfg = loadConfig();
+  const cicloEl = document.getElementById('cicloDiscount');
+  const anclaEl = document.getElementById('anclaMarkup');
+  const ndEl = document.getElementById('nextCycleDate');
+  if (cicloEl) cicloEl.value = cfg.cicloDiscount;
+  if (anclaEl) anclaEl.value = cfg.anclaMarkup;
+  if (ndEl) ndEl.value = cfg.nextCycleDate;
+}
+
+function loadHistory() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch (e) { return []; }
+}
+
+function saveToHistory(s, p) {
+  const history = loadHistory();
+  const entry = {
+    id: Date.now().toString(),
+    createdAt: s.createdAt,
+    contactName: s.contactName,
+    company: s.company,
+    clientType: s.clientType,
+    modality: s.modality,
+    numPersonas: s.numPersonas,
+    formato: p.formato,
+    precioMensual: p.precioMensual,
+    state: s,
+    pricing: p
+  };
+  history.unshift(entry);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 500)));
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  const container = document.getElementById('historyList');
+  if (!history.length) {
+    container.innerHTML = '<div class="history-empty"><div class="icon">📋</div><p>Aún no hay cotizaciones guardadas.</p><p style="font-size:13px; margin-top:8px;">Las cotizaciones se guardan automáticamente al generar la propuesta.</p></div>';
+    return;
+  }
+  const search = document.getElementById('historySearch').value.toLowerCase();
+  const filtered = search
+    ? history.filter(h => (h.contactName + ' ' + (h.company || '')).toLowerCase().includes(search))
+    : history;
+
+  container.innerHTML = '<div class="history-list">' + filtered.map(h => `
+    <div class="history-item">
+      <div class="type-tag ${h.clientType === 'particular' ? 'p' : ''}">${h.clientType === 'corporativo' ? 'Corp' : 'Part'}</div>
+      <div class="info">
+        <div class="name">${h.contactName}${h.company ? ' · ' + h.company : ''}</div>
+        <div class="meta">${h.formato} · ${h.numPersonas} pers · ${new Date(h.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+      </div>
+      <div class="price">$${fmt(h.precioMensual)}</div>
+      <div class="actions">
+        <button class="action-btn" onclick="regenerateFromHistory('${h.id}')">↻ Ver</button>
+        <button class="action-btn" onclick="duplicateFromHistory('${h.id}')">⎘ Duplicar</button>
+        <button class="action-btn del" onclick="deleteFromHistory('${h.id}')">✕</button>
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+document.getElementById('historySearch').addEventListener('input', renderHistory);
+
+function regenerateFromHistory(id) {
+  const h = loadHistory().find(x => x.id === id);
+  if (!h) return;
+  const html = buildProposalHTML(h.state, h.pricing);
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+function duplicateFromHistory(id) {
+  const h = loadHistory().find(x => x.id === id);
+  if (!h) return;
+  const s = h.state;
+  // llena el formulario con los datos
+  document.getElementById('contactName').value = s.contactName;
+  document.getElementById('company').value = s.company;
+  document.getElementById('email').value = s.email;
+  document.getElementById('phone').value = s.phone;
+  document.querySelector(`input[name="clientType"][value="${s.clientType}"]`).checked = true;
+  document.querySelector(`input[name="modality"][value="${s.modality}"]`).checked = true;
+  document.getElementById('numPersonas').value = s.numPersonas;
+  document.getElementById('nivel').value = s.nivel;
+  document.getElementById('duracion').value = s.duracion;
+  if (s.formatPart) {
+    document.querySelectorAll('input[name="formatPart"]').forEach(i => i.checked = false);
+    String(s.formatPart).split(',').forEach(v => {
+      const el = document.querySelector(`input[name="formatPart"][value="${v.trim()}"]`);
+      if (el) el.checked = true;
+    });
+  }
+  document.getElementById('zona').value = s.zona;
+  document.getElementById('metaPrincipal').value = s.metaPrincipal;
+  document.getElementById('desafio1').value = s.desafio1;
+  document.getElementById('desafio2').value = s.desafio2;
+  document.getElementById('sector').value = s.sector;
+  document.getElementById('horario').value = s.horario;
+  updateFormatVisibility();
+  document.querySelector('.tab[data-tab="cotizar"]').click();
+  goToStep(1);
+}
+
+function deleteFromHistory(id) {
+  if (!confirm('¿Eliminar esta cotización del historial?')) return;
+  const h = loadHistory().filter(x => x.id !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
+  renderHistory();
+}
+
+function clearAllHistory() {
+  if (!confirm('⚠ Esto eliminará TODO el historial. Asegúrate de haber exportado antes. ¿Continuar?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  renderHistory();
+  alert('Historial eliminado.');
+}
+
+function exportHistory() {
+  const data = loadHistory();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `GT_cotizaciones_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  localStorage.setItem('gt_last_backup', Date.now().toString());
+}
+
+function exportHistoryCSV() {
+  const data = loadHistory();
+  if (!data.length) {
+    alert('No hay cotizaciones para exportar.');
+    return;
+  }
+  const headers = [
+    'Fecha', 'Prospecto', 'Empresa', 'Tipo', 'Modalidad',
+    'Personas', 'Nivel', 'Formato', 'Duración (meses)',
+    'Precio mensual', 'Total grupo/mes', 'Fee traslado',
+    'Precio ancla', 'Precio Ciclo Completo', 'Value Stack total',
+    'Ancla activa', 'Ciclo activo', 'Valor Stack activo',
+    'Urgencia activa', 'Incentivo activo',
+    'Tipo urgencia', 'Tipo incentivo', 'Sector'
+  ];
+  const rows = data.map(h => {
+    const s = h.state || {};
+    const p = h.pricing || {};
+    return [
+      new Date(h.createdAt).toLocaleDateString('es-MX'),
+      csvEscape(s.contactName),
+      csvEscape(s.company),
+      s.clientType,
+      s.modality,
+      s.numPersonas,
+      s.nivel,
+      csvEscape(p.formato),
+      s.duracion,
+      p.precioMensual,
+      p.precioTotalGrupo || '',
+      p.feeTraslado || 0,
+      p.precioAncla || '',
+      p.precioCiclo || '',
+      p.valueStackTotal || '',
+      s.tactAncla ? 'Sí' : 'No',
+      s.tactCiclo ? 'Sí' : 'No',
+      s.tactValueStack ? 'Sí' : 'No',
+      s.tactUrgencia ? 'Sí' : 'No',
+      s.tactIncentivo ? 'Sí' : 'No',
+      s.urgencyType || '',
+      s.incentivoType || '',
+      csvEscape(s.sector)
+    ].join(',');
+  });
+  const csv = '\ufeff' + headers.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `GT_cotizaciones_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function csvEscape(val) {
+  if (!val) return '';
+  const str = String(val);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+// Recordatorio de backup cada 30 días
+function checkBackupReminder() {
+  const history = loadHistory();
+  if (history.length < 5) return; // solo si ya hay cotizaciones suficientes
+  const lastBackup = localStorage.getItem('gt_last_backup');
+  const dismissed = localStorage.getItem('gt_backup_dismissed_until');
+  const now = Date.now();
+
+  // Si el usuario lo descartó recientemente, respetar
+  if (dismissed && parseInt(dismissed) > now) return;
+
+  const daysSince = lastBackup
+    ? (now - parseInt(lastBackup)) / (1000 * 60 * 60 * 24)
+    : 999;
+
+  if (daysSince > 30) {
+    document.getElementById('backupBanner').style.display = 'flex';
+  }
+}
+
+function dismissBackupBanner() {
+  document.getElementById('backupBanner').style.display = 'none';
+  // Volver a recordar en 7 días
+  const sevenDays = Date.now() + (7 * 24 * 60 * 60 * 1000);
+  localStorage.setItem('gt_backup_dismissed_until', sevenDays.toString());
+}
+
+function importHistory() {
+  document.getElementById('importFile').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('Formato inválido');
+      const current = loadHistory();
+      const merged = [...data, ...current];
+      const unique = Array.from(new Map(merged.map(h => [h.id, h])).values());
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(unique));
+      renderHistory();
+      alert(`Importadas ${data.length} cotizaciones.`);
+    } catch (err) {
+      alert('Error al importar: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ────────────────────────────────────────────────────
+// BUILD PROPOSAL HTML (propuesta final autónoma)
+// ────────────────────────────────────────────────────
+function buildProposalHTML(s, p, pdfMode = false) {
+  const cfg = loadConfig();
+  const today = new Date();
+  const vigenciaDate = new Date(today);
+  vigenciaDate.setDate(vigenciaDate.getDate() + 15);
+  const firmaDate = new Date(today);
+  firmaDate.setDate(firmaDate.getDate() + 7);
+  const formatDate = d => d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Nombre sugerido para el PDF
+  const safeName = s.contactName.replace(/[^a-zA-Z0-9]/g, '_');
+  const safeCompany = (s.company || 'Particular').replace(/[^a-zA-Z0-9]/g, '_');
+  const todayISO = today.toISOString().split('T')[0];
+  const pdfTitle = `Cotizacion_${safeName}_${safeCompany}_${todayISO}`;
+
+  // Bloque de planes (solo si es plan-1a1)
+  let pricingCards = '';
+  if (p.planEssentials) {
+    pricingCards = `
+    <div class="plans-grid">
+      <div class="plan-card decoy">
+        <div class="plan-label">Plan Essentials</div>
+        <div class="plan-price">$${fmt(p.planEssentials)}<small>/mes</small></div>
+        <div class="plan-detail">1 sesión/semana · ~6 hrs/mes</div>
+        <div class="plan-desc">Mantenimiento mínimo · para quien ya tiene nivel y solo quiere práctica constante</div>
+        ${s.tactCiclo ? `<div class="plan-ciclo">Ciclo Completo: <strong>$${fmt(p.planEssentialsCiclo)}/mes</strong></div>` : ''}
+      </div>
+      <div class="plan-card recommended">
+        <div class="plan-badge">★ Recomendado</div>
+        <div class="plan-label">Plan Progress</div>
+        <div class="plan-price">$${fmt(p.planProgress)}<small>/mes</small></div>
+        <div class="plan-detail">2 sesiones/semana · ~12 hrs/mes</div>
+        <div class="plan-desc">Ritmo óptimo para avanzar de nivel en 4-5 meses con práctica real</div>
+        ${s.tactCiclo ? `<div class="plan-ciclo">Ciclo Completo: <strong>$${fmt(p.planProgressCiclo)}/mes</strong></div>` : ''}
+      </div>
+      <div class="plan-card">
+        <div class="plan-label">Plan Accelerate</div>
+        <div class="plan-price">$${fmt(p.planAccelerate)}<small>/mes</small></div>
+        <div class="plan-detail">3 sesiones/semana · ~18 hrs/mes</div>
+        <div class="plan-desc">Programa intensivo · recomendado si hay urgencia laboral o meta a corto plazo</div>
+        ${s.tactCiclo ? `<div class="plan-ciclo">Ciclo Completo: <strong>$${fmt(p.planAccelerateCiclo)}/mes</strong></div>` : ''}
+      </div>
+    </div>`;
+  } else {
+    const anchorBlock = s.tactAncla ? `<div class="price-anchor">Precio estándar 2026: <span>$${fmt(p.precioAncla)}${p.hasIVA ? ' + IVA' : ''}/mes</span></div>` : '';
+    const totalLabel = p.isGroupPrice ? `MXN/mes${p.hasIVA ? ' + IVA' : ''}` : `MXN/persona/mes${p.hasIVA ? ' + IVA' : ''}`;
+    const groupTotalRow = (!p.isGroupPrice && s.numPersonas > 1) ?
+      `<div class="price-group-total">Total del grupo: <strong>$${fmt(p.precioTotalGrupo)}${p.hasIVA ? ' + IVA' : ''}/mes</strong></div>` : '';
+    const trasladoRow = p.feeTraslado > 0 ?
+      `<div class="price-extra">+ Fee de traslado mensual (${TABULADOR.corporativo.feeTrasladoLabel[s.zona]}): <strong>$${fmt(p.feeTraslado)}/mes</strong></div>` : '';
+    const cicloRow = s.tactCiclo ?
+      `<div class="price-ciclo"><strong>Precio Ciclo Completo (compromiso ${s.duracion} meses, −${cfg.cicloDiscount}%):</strong> $${fmt(p.precioCiclo)}${p.isGroupPrice ? '/mes' : '/persona/mes'}${p.hasIVA ? ' + IVA' : ''}<br><small>Ahorro: $${fmt((p.precioMensual - p.precioCiclo) * s.duracion * (p.isGroupPrice ? 1 : s.numPersonas))} en el programa completo</small></div>` : '';
+
+    pricingCards = `
+    <div class="price-card">
+      ${anchorBlock}
+      <div class="price-main">$${fmt(p.precioMensual)}<small>${totalLabel}</small></div>
+      ${groupTotalRow}
+      ${trasladoRow}
+      ${cicloRow}
+    </div>`;
+  }
+
+  // Value Stack
+  let valueStackHTML = '';
+  if (s.tactValueStack) {
+    valueStackHTML = `
+    <div class="value-stack">
+      <div class="vs-title">Valor incluido en tu programa <span>sin costo adicional</span></div>
+      ${p.valueStack.map(v => `
+        <div class="vs-row">
+          <div class="vs-item">${v.item}</div>
+          <div class="vs-amount">incluido · val. $${fmt(v.amount)}</div>
+        </div>
+      `).join('')}
+      <div class="vs-total">
+        <div class="vs-label">Valor total incluido en tu programa</div>
+        <div class="vs-big">$${fmt(p.valueStackTotal)}</div>
+      </div>
+    </div>`;
+  }
+
+  // Urgencia
+  let urgenciaBlock = '';
+  if (s.tactUrgencia || s.tactIncentivo) {
+    const urgencyText = {
+      'ciclo': `Los grupos inician en ciclos fijos. Confirmar ahora asegura tu lugar en el ciclo en curso.`,
+      'cupo': `Para el horario solicitado hay cupo limitado. Asignamos por orden de confirmación; esta propuesta aparta tu lugar hasta el <strong>${formatDate(vigenciaDate)}</strong>.`,
+      'trimestre': `Los precios de este tabulador 2026 se mantienen hasta fin del trimestre en curso. A partir del próximo ciclo aplica un ajuste por inflación — si firmamos ahora, bloqueamos la tarifa para el ciclo completo.`
+    };
+    const incentivoText = {
+      'inscripcion': ``,  // eliminado
+      'diagnostico': `Si confirmas antes del <strong>${formatDate(firmaDate)}</strong>, incluimos una sesión de diagnóstico extendido 1:1 con Gabriel Turner (valor $2,490 MXN) para profundizar tu plan de estudio.`,
+      'bonus': `Si confirmas antes del <strong>${formatDate(firmaDate)}</strong>, incluimos una clase bonus mensual de tema libre (idioms, cultural topics, business writing) durante los primeros 3 meses.`,
+      'material': `Si confirmas antes del <strong>${formatDate(firmaDate)}</strong>, incluimos acceso al paquete Business English Extended con material de vocabulario especializado por sector (valor $450 MXN).`
+    };
+    urgenciaBlock = `
+    <div class="urgency-block">
+      <div class="urgency-title">Vigencia y ventana de oportunidad</div>
+      ${s.tactUrgencia ? `<p class="urgency-p">${urgencyText[s.urgencyType]}</p>` : ''}
+      ${s.tactIncentivo ? `<p class="urgency-p urgency-incentive">${incentivoText[s.incentivoType]}</p>` : ''}
+      <p class="urgency-p urgency-validity">Esta propuesta es válida hasta el <strong>${formatDate(vigenciaDate)}</strong>.</p>
+    </div>`;
+  }
+
+  // Título y saludo personalizado
+  const greeting = s.company
+    ? `Propuesta para ${s.company}`
+    : `Propuesta para ${s.contactName}`;
+  const programName = s.clientType === 'corporativo'
+    ? `Programa de capacitación corporativa · ${p.formato}`
+    : `Programa personalizado · ${p.formato}`;
+
+  // Desafíos
+  const retos = [];
+  if (s.desafio1) retos.push(s.desafio1);
+  if (s.desafio2) retos.push(s.desafio2);
+
+  // Objetivos (4 por defecto adaptados a nivel)
+  const objetivos = generateObjectives(s.nivel, s.sector);
+
+  // Ruta de aprendizaje
+  const ruta = generateRoute(s.nivel, s.duracion);
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>${pdfTitle}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #1E3A5F; --primary-light: #93B4D4; --primary-dark: #152C47;
+    --navy: #1a1612; --navy-mid: #292524; --off-white: #FAF8F3;
+    --gray: #6B7280; --text: #1F2937; --border: rgba(26,22,18,0.12);
+    --green: #16a34a; --amber: #D97706; --gold: #1E3A5F;
+  }
+  body { font-family: 'DM Sans', sans-serif; color: var(--text); background: #f5f3fb; line-height: 1.55; }
+  .page { max-width: 820px; margin: 0 auto; background: white; padding: 0 0 40px; box-shadow: 0 1px 20px rgba(0,0,0,0.06); }
+  .nivel-banner {
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    color: white; padding: 8px 24px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+  }
+  .hero {
+    background: linear-gradient(140deg, var(--navy), var(--navy-mid) 60%, var(--primary-dark));
+    color: white; padding: 44px 44px 36px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px;
+    border-radius: 50%; background: radial-gradient(circle, rgba(175,169,236,0.22), transparent 70%);
+  }
+  .hero-brand { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; }
+  .hero-brand span { color: var(--primary-light); }
+  .hero-tag { color: rgba(255,255,255,0.55); font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; margin-top: 4px; }
+  .hero-for { color: var(--primary-light); font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; margin-top: 30px; font-weight: 700; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 900; line-height: 1.1; margin-top: 6px; }
+  .hero-title em { color: var(--primary-light); font-style: italic; }
+  .hero-sub { color: rgba(255,255,255,0.7); font-size: 15px; margin-top: 8px; }
+  .profile-strip {
+    background: var(--off-white); padding: 18px 44px; display: flex; gap: 30px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .profile-strip .ps-item { display: flex; flex-direction: column; gap: 2px; }
+  .profile-strip .ps-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); font-weight: 700; }
+  .profile-strip .ps-val { font-size: 14px; color: var(--navy); font-weight: 600; }
+  section { padding: 32px 44px; }
+  h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); letter-spacing: -0.2px; margin-bottom: 14px; }
+  .eyebrow { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--primary); font-weight: 700; margin-bottom: 4px; }
+  p.lead { color: var(--gray); font-size: 14px; margin-bottom: 16px; }
+  .insight-box {
+    background: linear-gradient(135deg, rgba(83,74,183,0.06), rgba(175,169,236,0.08));
+    border-left: 4px solid var(--primary); padding: 18px 22px; border-radius: 0 10px 10px 0; margin: 16px 0;
+    font-size: 14.5px; color: var(--text);
+  }
+  .insight-box strong { color: var(--primary-dark); }
+  .challenges { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0 4px; }
+  .challenge {
+    background: white; border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+    border-top: 3px solid var(--amber);
+  }
+  .challenge .num { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--amber); font-weight: 900; line-height: 1; }
+  .challenge p { font-size: 13.5px; margin-top: 6px; color: var(--text); line-height: 1.5; }
+  .goals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 4px; }
+  .goal {
+    background: var(--off-white); border-radius: 8px; padding: 12px 14px; font-size: 13.5px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .goal .check { color: var(--green); font-weight: 700; flex-shrink: 0; font-size: 15px; }
+  .goal strong { color: var(--navy); }
+  .route {
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 14px;
+  }
+  .route-item { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-start; }
+  .route-item:last-child { border-bottom: none; }
+  .route-month {
+    background: var(--primary); color: white; border-radius: 50%; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
+  }
+  .route-text { flex: 1; font-size: 13.5px; color: var(--text); }
+  .route-text strong { color: var(--navy); display: block; margin-bottom: 2px; }
+
+  /* Planes */
+  .plans-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .plan-card {
+    background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 18px 16px;
+    position: relative; text-align: left;
+  }
+  .plan-card.decoy { background: rgba(180,83,9,0.03); border-color: rgba(180,83,9,0.2); }
+  .plan-card.recommended {
+    border-color: var(--primary); border-width: 2px;
+    background: linear-gradient(135deg, rgba(83,74,183,0.05), rgba(175,169,236,0.08));
+    box-shadow: 0 4px 14px rgba(83,74,183,0.15);
+  }
+  .plan-badge {
+    position: absolute; top: -10px; left: 16px;
+    background: var(--primary); color: white; padding: 3px 10px; border-radius: 12px;
+    font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+  }
+  .plan-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 4px; }
+  .plan-price { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+  .plan-price small { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--gray); font-weight: 400; margin-left: 4px; }
+  .plan-card.decoy .plan-price { color: var(--gold); }
+  .plan-detail { font-size: 12px; color: var(--gray); margin-bottom: 8px; font-weight: 500; }
+  .plan-desc { font-size: 12.5px; color: var(--text); line-height: 1.45; margin-bottom: 10px; }
+  .plan-ciclo {
+    font-size: 11.5px; color: var(--green); background: rgba(22,163,74,0.08);
+    padding: 6px 8px; border-radius: 6px; margin-top: auto;
+  }
+
+  /* Price card (cuando no es plan-1a1) */
+  .price-card {
+    background: white; border: 2px solid var(--primary); border-radius: 12px;
+    padding: 22px 26px; text-align: center; margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(83,74,183,0.12);
+  }
+  .price-anchor { color: var(--gray); font-size: 13px; margin-bottom: 4px; }
+  .price-anchor span { text-decoration: line-through; color: var(--gold); font-weight: 600; }
+  .price-main { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 900; color: var(--primary); line-height: 1; }
+  .price-main small { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--gray); font-weight: 400; margin-left: 6px; }
+  .price-group-total { margin-top: 6px; font-size: 13.5px; color: var(--navy); }
+  .price-extra { margin-top: 10px; font-size: 13px; color: var(--gray); padding-top: 10px; border-top: 1px dashed var(--border); }
+  .price-ciclo {
+    margin-top: 14px; padding: 12px 14px;
+    background: rgba(22,163,74,0.08); border-radius: 8px; font-size: 13px;
+    color: var(--text); text-align: left; line-height: 1.5;
+  }
+  .price-ciclo strong { color: var(--green); }
+  .price-ciclo small { color: var(--gray); font-size: 11.5px; }
+
+  /* Value stack */
+  .value-stack {
+    background: white; border: 2px solid var(--green); border-radius: 12px;
+    padding: 20px 24px; margin-top: 24px;
+  }
+  .vs-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+  .vs-title span { color: var(--green); font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-left: 8px; }
+  .vs-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(22,163,74,0.2); font-size: 13px; }
+  .vs-row:last-of-type { border-bottom: none; }
+  .vs-item { color: var(--text); }
+  .vs-amount { color: var(--green); font-weight: 700; }
+  .vs-total { border-top: 2px solid var(--green); margin-top: 6px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .vs-label { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--navy); font-size: 14px; }
+  .vs-big { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--green); }
+
+  /* Urgency */
+  .urgency-block {
+    background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
+    border-left: 4px solid var(--amber); border-radius: 0 10px 10px 0; padding: 18px 22px; margin-top: 20px;
+  }
+  .urgency-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: #78350F; margin-bottom: 8px; }
+  .urgency-p { font-size: 13.5px; color: #78350F; margin-bottom: 6px; line-height: 1.5; }
+  .urgency-p:last-child { margin-bottom: 0; }
+  .urgency-p strong { color: #92400E; }
+  .urgency-incentive { background: rgba(245,158,11,0.15); padding: 10px 12px; border-radius: 6px; margin-top: 8px; }
+  .urgency-validity { font-style: italic; font-size: 12.5px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(120,53,15,0.15); }
+
+  /* Extras */
+  .extras-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .extra-item {
+    background: white; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
+    display: flex; gap: 10px; align-items: flex-start; font-size: 13px;
+  }
+  .extra-item .icon { color: var(--green); font-weight: 700; flex-shrink: 0; font-size: 15px; }
+  .extra-item strong { color: var(--navy); display: block; margin-bottom: 2px; }
+  .extra-item span { color: var(--gray); }
+
+  /* Method */
+  .method { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .method-item { background: var(--off-white); border-radius: 10px; padding: 14px 16px; }
+  .method-item .num {
+    width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+    font-family: 'Playfair Display', serif; margin-bottom: 8px; font-size: 13px;
+  }
+  .method-item strong { color: var(--navy); display: block; font-size: 14px; margin-bottom: 2px; }
+  .method-item p { font-size: 12.5px; color: var(--gray); line-height: 1.45; }
+
+  /* Steps */
+  .steps-list { counter-reset: step; margin-top: 14px; }
+  .step-l {
+    counter-increment: step; padding: 14px 18px 14px 60px; position: relative;
+    background: white; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;
+  }
+  .step-l::before {
+    content: counter(step); position: absolute; left: 18px; top: 14px;
+    width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+    font-family: 'Playfair Display', serif; font-size: 13px;
+  }
+  .step-l strong { color: var(--navy); display: block; font-size: 14px; margin-bottom: 2px; }
+  .step-l p { font-size: 13px; color: var(--gray); line-height: 1.45; }
+
+  /* Footer */
+  .proposal-footer {
+    background: var(--navy); color: white; padding: 28px 44px; margin-top: 20px;
+    display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;
+  }
+  .pf-brand { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
+  .pf-brand span { color: var(--primary-light); }
+  .pf-tag { color: rgba(255,255,255,0.5); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  .pf-contact { font-size: 12px; color: rgba(255,255,255,0.75); text-align: right; line-height: 1.7; }
+
+  /* Print optimizations */
+  @media print {
+    body { background: white; }
+    .page { box-shadow: none; max-width: 100%; }
+    .no-print { display: none !important; }
+    section { padding: 24px 36px; }
+    .plans-grid, .challenges, .goals, .method, .extras-grid { page-break-inside: avoid; }
+    .value-stack, .price-card, .urgency-block { page-break-inside: avoid; }
+  }
+  .print-bar {
+    position: fixed; top: 20px; right: 20px; background: var(--primary); color: white;
+    padding: 10px 18px; border-radius: 10px; cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 600; border: none; box-shadow: 0 4px 12px rgba(30,58,95,0.35);
+    z-index: 1000;
+  }
+  .print-bar:hover { background: var(--primary-dark); }
+
+  @media (max-width: 700px) {
+    .hero { padding: 30px 24px 26px; }
+    .hero-title { font-size: 28px; }
+    section { padding: 24px; }
+    .plans-grid, .challenges, .goals, .method, .extras-grid { grid-template-columns: 1fr; }
+    .profile-strip { padding: 14px 24px; }
+    .proposal-footer { padding: 22px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-bar no-print" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+
+<div class="page">
+  ${s.nivel !== 'no-se' ? `<div class="nivel-banner">Nivel ${s.nivel} · Programa diseñado para tu punto de partida</div>` : ''}
+
+  <div class="hero">
+    <div class="hero-brand">Gabriel <span>Turner</span></div>
+    <div class="hero-tag">Business English Training</div>
+    <div class="hero-for">${greeting}</div>
+    <div class="hero-title">${programName.split('·')[0]}<br><em>${programName.split('·')[1] || ''}</em></div>
+    <div class="hero-sub">${formatDate(today)}</div>
+  </div>
+
+  <div class="profile-strip">
+    <div class="ps-item"><div class="ps-label">Nivel</div><div class="ps-val">${s.nivel === 'no-se' ? 'Por diagnosticar' : s.nivel}</div></div>
+    <div class="ps-item"><div class="ps-label">Modalidad</div><div class="ps-val">${capitalize(s.modality)}</div></div>
+    ${s.sector ? `<div class="ps-item"><div class="ps-label">Sector</div><div class="ps-val">${s.sector}</div></div>` : ''}
+    ${s.horario ? `<div class="ps-item"><div class="ps-label">Horario</div><div class="ps-val">${s.horario}</div></div>` : ''}
+    <div class="ps-item"><div class="ps-label">Duración</div><div class="ps-val">${s.duracion} meses</div></div>
+  </div>
+
+  ${s.metaPrincipal ? `
+  <section>
+    <div class="eyebrow">Tu meta</div>
+    <h2>${s.contactName.split(' ')[0]}, esto es lo que escuché de ti</h2>
+    <div class="insight-box">${s.metaPrincipal}</div>
+  </section>` : ''}
+
+  ${retos.length ? `
+  <section>
+    <div class="eyebrow">Desafíos identificados</div>
+    <h2>Lo que hoy te detiene</h2>
+    <div class="challenges">
+      ${retos.map((r, i) => `<div class="challenge"><div class="num">0${i+1}</div><p>${r}</p></div>`).join('')}
+    </div>
+  </section>` : ''}
+
+  <section>
+    <div class="eyebrow">Lo que vas a lograr</div>
+    <h2>Objetivos concretos del programa</h2>
+    <div class="goals">
+      ${objetivos.map(o => `<div class="goal"><div class="check">✓</div><div><strong>${o.title}</strong><br>${o.desc}</div></div>`).join('')}
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Ruta pedagógica</div>
+    <h2>Tu camino en ${s.duracion} meses</h2>
+    <div class="route">
+      ${ruta.map(r => `<div class="route-item"><div class="route-month">${r.month}</div><div class="route-text"><strong>${r.title}</strong>${r.desc}</div></div>`).join('')}
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Tu inversión</div>
+    <h2>${p.planEssentials ? 'Elige tu intensidad' : 'Propuesta económica'}</h2>
+    ${p.planEssentials ? '<p class="lead">Tres planes con la misma metodología y maestro, distintos niveles de intensidad. El Plan Progress es el ritmo óptimo para avanzar de nivel en 4-5 meses con práctica sostenida.</p>' : ''}
+    ${pricingCards}
+    ${p.inscripcion > 0 ? `<div class="price-extra" style="margin-top:12px; text-align:center; color:var(--gray); font-size:13px;">+ Inscripción anual única: <strong>$${fmt(p.inscripcion)} MXN</strong></div>` : ''}
+    ${valueStackHTML}
+    ${urgenciaBlock}
+  </section>
+
+  <section>
+    <div class="eyebrow">Incluido sin costo</div>
+    <h2>Todo lo que ya está dentro</h2>
+    <div class="extras-grid">
+      <div class="extra-item"><div class="icon">✓</div><div><strong>Diagnóstico de nivel</strong><span>Antes de empezar · gratuito</span></div></div>
+      <div class="extra-item"><div class="icon">✓</div><div><strong>Material propio</strong><span>Desarrollado por Gabriel · sin libros genéricos</span></div></div>
+      <div class="extra-item"><div class="icon">✓</div><div><strong>Plataforma de sesiones</strong><span>Zoom o Meet · grabación disponible</span></div></div>
+      <div class="extra-item"><div class="icon">✓</div><div><strong>Reportes de avance</strong><span>${s.clientType === 'corporativo' ? 'Mensuales por colaborador' : 'Cada 4 semanas'}</span></div></div>
+      <div class="extra-item"><div class="icon">✓</div><div><strong>Clase de prueba</strong><span>Sin costo · sin compromiso</span></div></div>
+      <div class="extra-item"><div class="icon">✓</div><div><strong>Sin plazos forzosos</strong><span>Retención basada en resultados</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Metodología</div>
+    <h2>Cómo aprendes conmigo</h2>
+    <div class="method">
+      <div class="method-item"><div class="num">1</div><strong>Conversación primero</strong><p>80% del tiempo hablando · la gramática se adquiere en contexto, no aislada</p></div>
+      <div class="method-item"><div class="num">2</div><strong>Contenido relevante a tu rol</strong><p>Escenarios reales de tu trabajo · no temas genéricos de libro</p></div>
+      <div class="method-item"><div class="num">3</div><strong>Seguimiento con datos</strong><p>Reportes medibles de avance · sabes exactamente dónde estás</p></div>
+      <div class="method-item"><div class="num">4</div><strong>Honestidad sobre resultados</strong><p>Objetivos realistas, no promesas infladas · duración real por nivel: 4-5 meses</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Cómo empezamos</div>
+    <h2>Tres pasos para arrancar</h2>
+    <div class="steps-list">
+      <div class="step-l"><strong>Confirmas esta propuesta</strong><p>Por WhatsApp, email o llamada · sin papeleo complicado</p></div>
+      <div class="step-l"><strong>Agendamos diagnóstico y clase de prueba</strong><p>${s.clientType === 'corporativo' ? 'Coordinamos con tu equipo de RH para las evaluaciones' : 'En la semana siguiente a tu confirmación'}</p></div>
+      <div class="step-l"><strong>Arrancamos el programa</strong><p>Con plan claro, horario definido y objetivos medibles</p></div>
+    </div>
+  </section>
+
+  <div class="proposal-footer">
+    <div>
+      <div class="pf-brand">Gabriel <span>Turner</span></div>
+      <div class="pf-tag">English Training</div>
+    </div>
+    <div class="pf-contact">
+      📱 461 147 2119<br>
+      ✉️ info@gabrielturner.com<br>
+      🌐 gabrielturner.com<br>
+      📍 Celaya, Guanajuato · Bajío, Querétaro &amp; CDMX
+    </div>
+  </div>
+</div>
+
+</body>
+</html>`;
+}
+
+// ────────────────────────────────────────────────────
+// HELPERS CONTENIDO
+// ────────────────────────────────────────────────────
+function generateObjectives(nivel, sector) {
+  const base = [
+    { title: 'Comunicación fluida en contextos laborales', desc: 'Reuniones, emails, presentaciones y conversaciones informales con colegas o clientes internacionales.' },
+    { title: 'Confianza al hablar sin dudar', desc: 'Capacidad de responder preguntas sin bloqueos, reformular ideas en tiempo real y mantener conversaciones naturales.' },
+    { title: 'Vocabulario especializado de tu industria', desc: `${sector ? `Terminología técnica del sector ${sector}` : 'Terminología técnica de tu industria'} aplicada a casos reales de tu día a día.` },
+    { title: 'Preparación para situaciones específicas', desc: 'Entrevistas laborales, negociaciones, pitch a clientes, reuniones con directivos — adaptado a tus metas personales.' }
+  ];
+  return base;
+}
+
+function generateRoute(nivel, duracion) {
+  const routes = {
+    5: [
+      { month: 1, title: 'Mes 1 · Diagnóstico profundo y bases', desc: 'Evaluamos dónde estás realmente, identificamos fugas comunes y empezamos con fluidez conversacional básica.' },
+      { month: 2, title: 'Mes 2 · Expansión y estructura', desc: 'Ampliamos vocabulario activo y trabajamos estructuras que te faltan para sostener conversaciones más largas.' },
+      { month: 3, title: 'Mes 3 · Integración en contexto laboral', desc: 'Aplicamos todo a escenarios de tu trabajo: emails, llamadas, reuniones. Simulaciones reales.' },
+      { month: 4, title: 'Mes 4 · Refinamiento', desc: 'Corregimos patrones persistentes, mejoramos pronunciación y preparamos situaciones específicas que te interesen.' },
+      { month: 5, title: 'Mes 5 · Consolidación y evaluación', desc: 'Evaluación final de nivel, definición de próximo paso y decisión de continuar al siguiente nivel o cerrar ciclo.' }
+    ],
+    3: [
+      { month: 1, title: 'Mes 1 · Diagnóstico y arranque', desc: 'Evaluamos el punto de partida y nos enfocamos en avances rápidos medibles.' },
+      { month: 2, title: 'Mes 2 · Desarrollo intensivo', desc: 'Ejercicios dirigidos a las áreas más críticas para tu meta específica.' },
+      { month: 3, title: 'Mes 3 · Consolidación y evaluación', desc: 'Medimos avance real, definimos si continúas al siguiente bloque.' }
+    ],
+    10: [
+      { month: 1, title: 'Meses 1-2 · Nivel A · Diagnóstico y fundamentos', desc: 'Evaluación y construcción de bases sólidas.' },
+      { month: 3, title: 'Meses 3-4 · Nivel A · Integración', desc: 'Aplicación a contextos laborales y cierre de primer nivel.' },
+      { month: 5, title: 'Mes 5 · Transición y evaluación', desc: 'Evaluación intermedia y ajuste de ruta.' },
+      { month: 6, title: 'Meses 6-8 · Nivel B · Expansión', desc: 'Desarrollo del siguiente nivel con mayor profundidad.' },
+      { month: 9, title: 'Meses 9-10 · Nivel B · Consolidación', desc: 'Cierre de dos niveles completos con evaluación final.' }
+    ],
+    12: [
+      { month: 1, title: 'Meses 1-3 · Diagnóstico y primer ciclo', desc: 'Base completa del primer nivel.' },
+      { month: 4, title: 'Meses 4-6 · Avance de nivel', desc: 'Transición y desarrollo intermedio.' },
+      { month: 7, title: 'Meses 7-9 · Segundo nivel completo', desc: 'Consolidación de nivel superior.' },
+      { month: 10, title: 'Meses 10-12 · Refinamiento anual', desc: 'Preparación para certificación o cierre de año con evaluación final.' }
+    ]
+  };
+  return routes[duracion] || routes[5];
+}
+
+// ────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  updateFormatVisibility();
+  updateAnclaDefault();
+  loadConfigUI();
+  renderHistory();
+  checkBackupReminder();
+});
+
+// ────────────────────────────────────────────────────
+// BUSCADOR DE PROSPECTOS DESDE NOTION
+// ────────────────────────────────────────────────────
+const WORKER_URL = 'https://gt-portal-worker.gabriel32turner.workers.dev/';
+
+async function buscarProspecto() {
+  const q = document.getElementById('prospecto-search-input').value.trim();
+  if (!q) return;
+  const resultsDiv = document.getElementById('prospecto-results');
+  resultsDiv.innerHTML = '<span style="color:#6B7280;font-size:13px;">Buscando...</span>';
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getProspectos', q })
+    });
+    const json = await res.json();
+    const prospectos = json.data || [];
+    if (!prospectos.length) {
+      resultsDiv.innerHTML = '<span style="color:#9CA3AF;font-size:13px;">No se encontraron prospectos con ese nombre.</span>';
+      return;
+    }
+    resultsDiv.innerHTML = prospectos.map(p => `
+      <div onclick="cargarProspecto(${JSON.stringify(p).replace(/"/g,'&quot;')})"
+           style="padding:8px 12px;margin-top:4px;background:white;border:1px solid #E5E7EB;border-radius:8px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;"
+           onmouseover="this.style.borderColor='#1E3A5F'" onmouseout="this.style.borderColor='#E5E7EB'">
+        <span><strong>${p.nombre}</strong>${p.telefono ? ' · ' + p.telefono : ''}${p.nivel ? ' · Nivel ' + p.nivel : ''}</span>
+        <span style="color:#1E3A5F;font-size:11px;font-weight:700;">CARGAR →</span>
+      </div>`).join('');
+  } catch(e) {
+    resultsDiv.innerHTML = '<span style="color:#DC2626;font-size:13px;">Error al conectar con Notion. Verifica la conexión.</span>';
+  }
+}
+
+function cargarProspecto(p) {
+  // Llenar campos Step 1
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  set('contactName', p.nombre);
+  set('email',       p.email);
+  set('phone',       p.telefono);
+
+  // Extraer empresa de Notas si existe
+  const empresaMatch = (p.notas || '').match(/Empresa: (.+)/);
+  if (empresaMatch) set('company', empresaMatch[1]);
+
+  // Llenar sector de Notas
+  const sectorMatch = (p.notas || '').match(/Sector: (.+)/);
+
+  // Llenar Step 4 con datos del Jotform
+  const setTA = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  if (sectorMatch) setTA('sector', sectorMatch[1]);
+
+  // Extraer horario de Notas
+  const horarioMatch = (p.notas || '').match(/Horario preferido: (.+)/);
+  if (horarioMatch) setTA('horario', horarioMatch[1]);
+
+  // Construir meta principal desde Notas del Jotform
+  const situacionesMatch = (p.notas || '').match(/Situaciones laborales: (.+)/);
+  const dificultadesMatch = (p.notas || '').match(/Dificultades: (.+)/);
+  let meta = '';
+  if (p.objetivo)       meta += `Objetivo: ${p.objetivo}. `;
+  if (situacionesMatch) meta += `Situaciones: ${situacionesMatch[1]}. `;
+  if (dificultadesMatch) meta += `Dificultades: ${dificultadesMatch[1]}.`;
+  if (meta) setTA('metaPrincipal', meta.trim());
+
+  // Ocultar buscador y mostrar confirmación
+  document.getElementById('prospecto-search-box').innerHTML =
+    `<div style="color:#16a34a;font-weight:600;font-size:13px;">✓ Prospecto cargado: <strong>${p.nombre}</strong> — puedes editar los campos abajo si necesitas ajustar algo.</div>`;
+
+  // Scroll suave hacia los campos
+  document.getElementById('contactName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Permitir buscar con Enter
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('prospecto-search-input');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') buscarProspecto(); });
+});
+
+</script>
+
+</body>
+</html>
