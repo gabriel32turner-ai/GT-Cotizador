@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GT Cotizador · Corporativo & Particular</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --navy:     #0c1a30;
+  --navy2:    #152540;
+  --gold:     #b8922a;
+  --gold2:    #d4ad50;
+  --gold3:    #e8c97a;
+  --gold-pale:#fdf8ee;
+  --gold-mid: #e8d89a;
+  --bg:       #f0ede8;
+  --surface:  #fafaf8;
+  --white:    #ffffff;
+  --ink:      #0c1118;
+  --ink2:     #2a3344;
+  --ink3:     #64748b;
+  --ink4:     #a8b4c4;
+  --border:   #e2dfd8;
+  --border2:  #ccc8be;
+  --green:    #15803d;
+  --green-bg: #dcfce7;
+  --r:        12px;
+  --r-sm:     7px;
+  --r-xs:     4px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+.topbar{background:var(--navy);height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:200;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:#fff;letter-spacing:.02em;}
+.tb-brand em{color:var(--gold3);font-style:normal;}
+.tb-badge{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);border:1px solid rgba(184,146,42,.3);padding:3px 10px;border-radius:20px;}
+
+.app{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 50px);}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px 16px 28px;overflow-y:auto;position:sticky;top:50px;height:calc(100vh - 50px);display:flex;flex-direction:column;gap:0;}
+.s-label{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin-bottom:7px;display:block;}
+.s-section{margin-bottom:18px;}
+.s-field{margin-bottom:8px;}
+.s-field label{display:block;font-size:.7rem;font-weight:600;color:var(--ink3);margin-bottom:3px;}
+.s-input{width:100%;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:.45rem .7rem;outline:none;transition:border-color .15s,box-shadow .15s;}
+.s-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,42,.1);}
+.s-input::placeholder{color:var(--ink4);}
+.s-mono{font-family:'DM Mono',monospace;font-size:.86rem;}
+.s-divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+
+/* MODE SWITCH */
+.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--border);border-radius:8px;padding:3px;margin-bottom:18px;}
+.mode-btn{padding:7px;border-radius:5px;border:none;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;transition:all .15s;}
+.mode-btn.active{background:var(--white);color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+/* TOTAL EN VIVO */
+.sidebar-total{background:var(--navy);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:4px;}
+.st-label{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:2px;}
+.st-val{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:700;color:#fff;line-height:1;}
+.st-sub{font-size:.6rem;color:rgba(255,255,255,.32);margin-top:2px;}
+
+/* PLAN PILLS */
+.plan-pills{display:flex;flex-direction:column;gap:5px;}
+.plan-pill{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r-sm);border:1.5px solid var(--border);cursor:pointer;transition:all .13s;user-select:none;}
+.plan-pill:hover{border-color:var(--border2);background:var(--bg);}
+.plan-pill.active{border-color:var(--gold);background:var(--gold-pale);}
+.pp-radio{width:13px;height:13px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;transition:all .13s;position:relative;}
+.plan-pill.active .pp-radio{border-color:var(--gold);background:var(--gold);}
+.plan-pill.active .pp-radio::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:4px;height:4px;border-radius:50%;background:#fff;}
+.pp-name{font-size:.8rem;font-weight:600;color:var(--ink);}
+.pp-sub{font-size:.65rem;color:var(--ink3);}
+.plan-pill.active .pp-name{color:var(--navy);}
+.pp-popular{font-family:'DM Mono',monospace;font-size:.52rem;font-weight:700;text-transform:uppercase;color:var(--gold);background:var(--gold-pale);border:1px solid var(--gold-mid);padding:1px 4px;border-radius:3px;margin-left:5px;vertical-align:middle;}
+
+/* PRECIO */
+.price-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.price-field label{font-size:.68rem;font-weight:600;color:var(--ink3);margin-bottom:3px;display:block;}
+.price-wrap{position:relative;}
+.price-wrap .cur{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:'DM Mono',monospace;font-size:.78rem;color:var(--ink3);pointer-events:none;}
+.price-input{width:100%;font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink);background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:.42rem .6rem .42rem 1.4rem;outline:none;transition:border-color .15s;}
+.price-input:focus{border-color:var(--gold);}
+.price-input-bare{padding-left:.6rem;}
+
+/* DURACIÓN */
+.dur-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:4px;}
+.dur-btn{padding:5px 4px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;font-family:'DM Mono',monospace;font-size:.72rem;font-weight:600;color:var(--ink3);transition:all .12s;text-align:center;}
+.dur-btn:hover{border-color:var(--border2);}
+.dur-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-pale);}
+
+/* DESCUENTO SLIDER */
+.disc-row{display:flex;align-items:center;gap:10px;}
+.disc-slider{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:linear-gradient(to right,var(--gold) 0%,var(--gold) var(--val,0%),var(--border) var(--val,0%),var(--border) 100%);outline:none;cursor:pointer;}
+.disc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--gold);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer;}
+.disc-val{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:500;color:var(--green);min-width:32px;text-align:right;}
+
+/* TOGGLES */
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;}
+.tog-lbl{font-size:.78rem;color:var(--ink2);}
+.tog-sub{font-size:.63rem;color:var(--ink3);}
+.tog{width:32px;height:18px;border-radius:9px;background:var(--border2);position:relative;cursor:pointer;transition:background .18s;flex-shrink:0;}
+.tog.on{background:var(--gold);}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .18s;box-shadow:0 1px 2px rgba(0,0,0,.18);}
+.tog.on::after{transform:translateX(14px);}
+
+/* VIGENCIA */
+.vig-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px;}
+.vig-btn{padding:5px 4px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:600;color:var(--ink3);transition:all .12s;}
+.vig-btn:hover{border-color:var(--border2);}
+.vig-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-pale);}
+
+/* BOTONES */
+.bottom-btns{display:flex;flex-direction:column;gap:7px;margin-top:auto;padding-top:8px;}
+.gen-btn{width:100%;padding:.7rem;background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.gen-btn:hover{background:var(--navy2);transform:translateY(-1px);}
+.copy-btn{width:100%;padding:.52rem;background:transparent;color:var(--ink3);border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.copy-btn:hover{border-color:var(--gold);color:var(--gold);}
+.reset-btn{width:100%;padding:.4rem;background:transparent;color:var(--ink4);border:none;font-family:'DM Sans',sans-serif;font-size:.68rem;cursor:pointer;transition:color .15s;}
+.reset-btn:hover{color:var(--ink3);}
+.print-hint{font-size:.6rem;color:var(--ink4);text-align:center;margin-top:2px;}
+
+/* MAIN */
+.main{padding:24px 28px 48px;overflow-y:auto;}
+.preview-label{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.preview-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* COTIZACIÓN CARD */
+.cot-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 4px 28px rgba(12,26,48,.07);max-width:700px;}
+
+.cc-hdr{background:var(--navy);padding:20px 26px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.cc-logo{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:#fff;letter-spacing:.01em;}
+.cc-logo em{color:var(--gold3);font-style:normal;}
+.cc-tagline{font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;font-family:'DM Mono',monospace;}
+.cc-hdr-r{text-align:right;}
+.cc-doc-lbl{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin-bottom:1px;}
+.cc-num{font-family:'DM Mono',monospace;font-size:.65rem;font-weight:500;color:var(--gold3);letter-spacing:.06em;margin-bottom:4px;}
+.cc-empresa{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:#fff;line-height:1.15;}
+.cc-contacto{font-size:.68rem;color:rgba(255,255,255,.42);margin-top:2px;}
+.cc-fecha{font-size:.58rem;color:rgba(255,255,255,.25);margin-top:1px;font-family:'DM Mono',monospace;}
+
+.cc-strip{background:var(--gold);padding:6px 26px;display:flex;align-items:center;justify-content:space-between;}
+.cc-strip-l{font-size:.72rem;font-weight:600;color:var(--navy);}
+.cc-strip-r{font-family:'DM Mono',monospace;font-size:.62rem;color:rgba(12,26,48,.6);}
+
+.cc-body{padding:20px 26px;}
+
+/* PRICE HERO */
+.price-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--navy);border-radius:10px;padding:18px 22px;margin-bottom:16px;}
+.ph-badge{display:inline-block;font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--gold);color:var(--navy);padding:2px 8px;border-radius:20px;margin-bottom:5px;}
+.ph-plan{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:#fff;line-height:1.2;margin-bottom:2px;}
+.ph-sub{font-size:.68rem;color:rgba(255,255,255,.42);}
+.ph-right{text-align:right;flex-shrink:0;}
+.ph-was{font-family:'DM Mono',monospace;font-size:.7rem;color:rgba(232,201,122,.45);text-decoration:line-through;min-height:14px;margin-bottom:1px;}
+.ph-price{display:flex;align-items:baseline;gap:2px;justify-content:flex-end;}
+.ph-cur{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:500;color:var(--gold3);}
+.ph-num{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:700;color:#fff;line-height:1;}
+.ph-unit{font-size:.62rem;color:rgba(255,255,255,.35);margin-left:3px;padding-bottom:5px;}
+.ph-vig{display:inline-block;background:rgba(21,128,61,.3);color:#86efac;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:4px;}
+
+/* DESGLOSE */
+.cc-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.bk-item{background:var(--white);padding:10px 12px;}
+.bk-lbl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px;}
+.bk-val{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:var(--ink);line-height:1.1;}
+.bk-val.gold{color:var(--gold);}
+.bk-val.green{color:var(--green);}
+.bk-sub{font-size:.58rem;color:var(--ink4);margin-top:1px;}
+
+/* INCLUYE */
+.cc-sec{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.cc-sec::after{content:'';flex:1;height:.5px;background:var(--gold-mid);}
+.includes-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px;}
+.includes-grid .inc-item:last-child:nth-child(odd){grid-column:1 / -1;}
+.inc-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f8f7f4;border-radius:8px;border:1px solid var(--border);}
+.inc-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.inc-name{font-size:.88rem;font-weight:600;color:var(--ink2);flex:1;}
+.inc-free{font-family:'DM Mono',monospace;font-size:.7rem;font-weight:700;color:var(--green);background:var(--green-bg);padding:3px 8px;border-radius:4px;}
+
+/* PRUEBA SOCIAL */
+.social-proof{display:flex;align-items:center;gap:10px;background:#f8f7f4;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:16px;}
+.sp-num{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--navy);line-height:1;flex-shrink:0;}
+.sp-text{font-size:.75rem;color:var(--ink2);line-height:1.4;}
+.sp-text strong{color:var(--navy);}
+.sp-divider{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+
+/* PASOS */
+.steps{display:flex;align-items:flex-start;gap:0;margin-bottom:16px;}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;}
+.step:not(:last-child)::after{content:'';position:absolute;top:12px;left:calc(50% + 14px);right:calc(-50% + 14px);height:1px;background:var(--gold-mid);}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:500;color:var(--navy);margin-bottom:6px;flex-shrink:0;position:relative;z-index:1;}
+.step-label{font-size:.68rem;font-weight:600;color:var(--ink2);line-height:1.3;}
+.step-sub{font-size:.6rem;color:var(--ink3);margin-top:1px;}
+
+/* DESCUENTO BADGE */
+.desc-badge{display:flex;align-items:center;gap:8px;background:var(--green-bg);border:1px solid rgba(21,128,61,.2);border-radius:6px;padding:7px 12px;margin-bottom:12px;}
+.desc-text{font-size:.73rem;color:var(--green);font-weight:600;}
+
+/* IVA */
+.iva-nota{display:flex;align-items:center;gap:6px;background:rgba(184,146,42,.08);border:1px solid var(--gold-mid);border-radius:6px;padding:7px 10px;margin-bottom:12px;font-size:.67rem;color:var(--ink2);}
+.iva-nota strong{color:var(--gold);}
+
+/* FOOTER */
+.cc-footer{background:var(--navy);padding:12px 26px;display:flex;align-items:center;justify-content:space-between;}
+.cc-foot-brand{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:#fff;}
+.cc-foot-brand em{color:var(--gold3);font-style:normal;}
+.cc-foot-contact{font-size:.58rem;color:rgba(255,255,255,.32);line-height:1.8;margin-top:2px;font-family:'DM Mono',monospace;}
+.qr-col{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.qr-wrap{background:#fff;border-radius:4px;padding:3px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;}
+.qr-lbl{font-size:.5rem;color:rgba(255,255,255,.28);text-align:center;font-family:'DM Mono',monospace;}
+
+.cta-close{background:var(--navy);border-radius:10px;padding:20px 22px;margin-bottom:0;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.cta-text{font-size:1.05rem;font-weight:700;color:#fff;line-height:1.4;}
+.cta-sub{font-size:.82rem;color:rgba(255,255,255,.6);margin-top:5px;}
+
+.nota-wrap{max-width:700px;margin-top:14px;}
+.nota-lbl{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--ink4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.nota-ta{width:100%;font-family:'DM Sans',sans-serif;font-size:.78rem;color:var(--ink2);background:rgba(255,255,200,.25);border:1.5px dashed var(--border2);border-radius:var(--r-sm);padding:.55rem .8rem;outline:none;resize:vertical;min-height:52px;}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;font-size:.78rem;font-weight:600;padding:10px 18px;border-radius:var(--r-sm);box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(60px);opacity:0;transition:all .25s;z-index:999;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+.hidden{display:none!important;}
+
+@media (max-width:768px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:relative;top:0;height:auto;border-right:none;border-bottom:1px solid var(--border);}
+  .main{padding:16px 14px 32px;}
+}
+
+/* ════ PRINT ════ */
+@media print {
+  *,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  @page{size:A4 portrait;margin:0;}
+  body>*:not(#pdf-page){display:none!important;}
+  #pdf-page{display:block!important;width:210mm;font-family:'DM Sans',sans-serif;color:#0c1118;background:#fff;}
+
+  .pp-hdr{background:#0c1a30!important;padding:18pt 24pt 15pt;display:flex;align-items:flex-start;justify-content:space-between;}
+  .pp-logo{font-family:'Cormorant Garamond',serif;font-size:16pt;font-weight:600;color:#fff!important;}
+  .pp-logo em{color:#e8c97a!important;font-style:normal;}
+  .pp-tagline{font-size:5.5pt;color:rgba(255,255,255,.3)!important;letter-spacing:.1em;text-transform:uppercase;margin-top:2pt;font-family:'DM Mono',monospace;}
+  .pp-hdr-r{text-align:right;}
+  .pp-doc-lbl{font-family:'DM Mono',monospace;font-size:5pt;letter-spacing:.1em;text-transform:uppercase;color:#d4ad50!important;margin-bottom:1pt;}
+  .pp-num{font-family:'DM Mono',monospace;font-size:6.5pt;font-weight:500;color:#e8c97a!important;letter-spacing:.06em;margin-bottom:3pt;}
+  .pp-empresa{font-family:'Cormorant Garamond',serif;font-size:18pt;font-weight:600;color:#fff!important;line-height:1.15;}
+  .pp-contacto{font-size:7pt;color:rgba(255,255,255,.42)!important;margin-top:1pt;}
+  .pp-fecha{font-size:5.5pt;color:rgba(255,255,255,.25)!important;font-family:'DM Mono',monospace;}
+
+  .pp-strip{background:#b8922a!important;padding:5.5pt 24pt;display:flex;align-items:center;justify-content:space-between;}
+  .pp-strip-l{font-size:7pt;font-weight:700;color:#0c1a30!important;}
+  .pp-strip-r{font-family:'DM Mono',monospace;font-size:6pt;color:rgba(12,26,48,.6)!important;}
+
+  .pp-body{padding:16pt 24pt;}
+
+  .pp-hero{background:#0c1a30!important;border-radius:8pt;padding:14pt 18pt;margin-bottom:12pt;display:flex;align-items:center;justify-content:space-between;gap:12pt;}
+  .pp-badge{display:inline-block;font-size:5pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#b8922a!important;color:#0c1a30!important;padding:2pt 7pt;border-radius:10pt;margin-bottom:4pt;}
+  .pp-plan{font-family:'Cormorant Garamond',serif;font-size:14pt;font-weight:600;color:#fff!important;line-height:1.2;margin-bottom:2pt;}
+  .pp-plan-sub{font-size:6.5pt;color:rgba(255,255,255,.42)!important;}
+  .pp-price-r{text-align:right;flex-shrink:0;}
+  .pp-was{font-family:'DM Mono',monospace;font-size:6.5pt;color:rgba(232,201,122,.45)!important;text-decoration:line-through;min-height:11pt;}
+  .pp-price-unit{font-size:5.5pt;color:rgba(255,255,255,.35)!important;text-align:right;margin-bottom:1pt;}
+  .pp-price-row{display:flex;align-items:baseline;gap:2pt;justify-content:flex-end;}
+  .pp-cur{font-family:'DM Mono',monospace;font-size:8pt;font-weight:500;color:#e8c97a!important;}
+  .pp-price-big{font-family:'Cormorant Garamond',serif;font-size:30pt;font-weight:700;color:#fff!important;line-height:1;}
+  .pp-vig{display:inline-block;background:rgba(21,128,61,.3)!important;color:#86efac!important;font-size:5.5pt;font-weight:700;padding:1.5pt 6pt;border-radius:3pt;margin-top:3pt;}
+
+  .pp-bk{display:grid;grid-template-columns:repeat(3,1fr);gap:1pt;background:#e2dfd8!important;border-radius:6pt;overflow:hidden;margin-bottom:12pt;}
+  .pp-bk-item{background:#fff!important;padding:9pt 11pt;}
+  .pp-bk-lbl{font-family:'DM Mono',monospace;font-size:5.5pt;letter-spacing:.05em;text-transform:uppercase;color:#64748b!important;margin-bottom:2pt;}
+  .pp-bk-val{font-family:'Cormorant Garamond',serif;font-size:13pt;font-weight:600;color:#0c1118!important;line-height:1;}
+  .pp-bk-val-gold{color:#b8922a!important;}
+  .pp-bk-val-green{color:#15803d!important;}
+  .pp-bk-sub{font-size:5pt;color:#a8b4c4!important;margin-top:1pt;}
+
+  .pp-desc{display:flex;align-items:center;gap:7pt;background:#dcfce7!important;border:1pt solid rgba(21,128,61,.2)!important;border-radius:5pt;padding:6pt 10pt;margin-bottom:11pt;}
+  .pp-desc-text{font-size:7pt;color:#15803d!important;font-weight:600;}
+
+  .pp-sec{font-family:'DM Mono',monospace;font-size:5pt;letter-spacing:.14em;text-transform:uppercase;color:#b8922a!important;margin-bottom:8pt;display:flex;align-items:center;gap:7pt;}
+  .pp-sec::after{content:'';flex:1;height:.5pt;background:#e8d89a!important;}
+  .pp-includes{display:grid;gap:6pt;margin-bottom:12pt;}
+  .pp-inc{background:#f8f7f4!important;border:1pt solid #e2dfd8!important;border-radius:5pt;padding:8pt 9pt;}
+  .pp-inc-dot{width:4pt;height:4pt;border-radius:50%;background:#b8922a!important;margin-bottom:4pt;}
+  .pp-inc-name{font-size:7pt;font-weight:700;color:#0c1118!important;margin-bottom:1pt;}
+  .pp-inc-free{display:inline-block;background:#dcfce7!important;color:#15803d!important;font-size:6pt;font-weight:800;padding:1pt 4pt;border-radius:2pt;}
+
+  .pp-social{display:flex;align-items:center;gap:10pt;background:#f8f7f4!important;border:1pt solid #e2dfd8!important;border-radius:6pt;padding:9pt 12pt;margin-bottom:12pt;}
+  .pp-sp-num{font-family:'Cormorant Garamond',serif;font-size:18pt;font-weight:700;color:#0c1a30!important;line-height:1;flex-shrink:0;}
+  .pp-sp-div{width:.5pt;height:24pt;background:#e2dfd8!important;flex-shrink:0;}
+  .pp-sp-text{font-size:7pt;color:#2a3344!important;line-height:1.45;}
+  .pp-sp-text strong{color:#0c1a30!important;}
+
+  .pp-steps{display:flex;align-items:flex-start;gap:0;margin-bottom:12pt;}
+  .pp-step{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;}
+  .pp-step:not(:last-child)::after{content:'';position:absolute;top:9pt;left:calc(50% + 11pt);right:calc(-50% + 11pt);height:.5pt;background:#e8d89a!important;}
+  .pp-step-num{width:20pt;height:20pt;border-radius:50%;background:#b8922a!important;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:6pt;font-weight:500;color:#0c1a30!important;margin-bottom:5pt;position:relative;z-index:1;}
+  .pp-step-lbl{font-size:6.5pt;font-weight:700;color:#2a3344!important;line-height:1.3;}
+  .pp-step-sub{font-size:5.5pt;color:#64748b!important;margin-top:.5pt;}
+
+  .pp-cta{background:#fdf8ee!important;border:1.5pt solid #e8d89a!important;border-radius:7pt;padding:11pt 14pt;margin-bottom:11pt;display:flex;align-items:center;justify-content:space-between;}
+  .pp-cta-text{font-size:8pt;font-weight:700;color:#0c1a30!important;line-height:1.4;}
+  .pp-cta-sub{font-size:6.5pt;color:#64748b!important;margin-top:1.5pt;}
+  .pp-cta-r{display:flex;flex-direction:column;align-items:center;gap:3pt;}
+  .pp-qr-wrap{background:#fff!important;border-radius:4pt;padding:3pt;width:52pt;height:52pt;display:flex;align-items:center;justify-content:center;}
+  .pp-qr-lbl{font-size:5pt;color:#64748b!important;text-align:center;font-family:'DM Mono',monospace;}
+
+  .pp-iva{display:flex;align-items:center;gap:5pt;background:rgba(184,146,42,.08)!important;border:1pt solid #e8d89a!important;border-radius:5pt;padding:6pt 9pt;margin-bottom:10pt;font-size:6.5pt;color:#2a3344!important;}
+  .pp-iva strong{color:#b8922a!important;}
+
+  .pp-cond{background:#f2f0ec!important;border-radius:5pt;padding:8pt 11pt;}
+  .pp-cond-text{font-size:6pt;color:#64748b!important;line-height:1.55;}
+  .pp-cond-text strong{color:#2a3344!important;}
+
+  .pp-footer{background:#0c1a30!important;padding:10pt 24pt;display:flex;align-items:center;justify-content:space-between;margin-top:10pt;}
+  .pp-foot-brand{font-family:'Cormorant Garamond',serif;font-size:11pt;font-weight:600;color:#fff!important;}
+  .pp-foot-brand em{color:#e8c97a!important;font-style:normal;}
+  .pp-foot-contact{font-size:5.5pt;color:rgba(255,255,255,.32)!important;line-height:1.9;margin-top:2pt;font-family:'DM Mono',monospace;}
+  .pp-qr-col{display:flex;flex-direction:column;align-items:center;gap:3pt;}
+  .pp-qr-wrap-ft{background:#fff!important;border-radius:3pt;padding:3pt;width:44pt;height:44pt;display:flex;align-items:center;justify-content:center;}
+  .pp-qr-wrap-ft img,.pp-qr-wrap-ft canvas{width:38pt!important;height:38pt!important;}
+  .pp-qr-lbl-ft{font-size:5pt;color:rgba(255,255,255,.28)!important;text-align:center;font-family:'DM Mono',monospace;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="tb-brand">GT<em> English</em> Training</span>
+  <span class="tb-badge">Cotizador 2026</span>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div class="app">
+  <aside class="sidebar">
+
+    <!-- MODO -->
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="corp" onclick="setModo('corp')">Corporativo</button>
+      <button class="mode-btn" data-mode="part" onclick="setModo('part')">Particular</button>
+    </div>
+
+    <!-- CLIENTE -->
+    <div class="s-section">
+      <span class="s-label">Cliente</span>
+      <div class="s-field">
+        <label id="lbl-cliente">Empresa</label>
+        <input class="s-input" id="f-empresa" type="text" placeholder="Ej. Apex Tool Group" oninput="save();upd()">
+      </div>
+      <div class="s-field">
+        <label>Contacto</label>
+        <input class="s-input" id="f-contacto" type="text" placeholder="Ej. Lic. García · RH" oninput="save();upd()">
+      </div>
+      <div class="s-field">
+        <label>N° de cotización</label>
+        <input class="s-input s-mono" id="f-num" type="text" placeholder="GT-2026-001" oninput="save();upd()">
+      </div>
+    </div>
+
+    <hr class="s-divider">
+
+    <!-- CORP: MODALIDAD -->
+    <div class="s-section" id="sec-corp-plan">
+      <span class="s-label">Modalidad</span>
+      <div class="plan-pills">
+        <div class="plan-pill active" data-plan="1a1" onclick="setPlan('1a1')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">Clases 1 a 1</div><div class="pp-sub">Online · por colaborador</div></div>
+        </div>
+        <div class="plan-pill" data-plan="grupal" onclick="setPlan('grupal')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">Grupal corporativo</div><div class="pp-sub">Online · precio por persona</div></div>
+        </div>
+        <div class="plan-pill" data-plan="presencial" onclick="setPlan('presencial')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">Presencial in-company</div><div class="pp-sub">Instalaciones del cliente</div></div>
+        </div>
+        <div class="plan-pill" data-plan="mixto" onclick="setPlan('mixto')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">Programa mixto</div><div class="pp-sub">Online + presencial</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART: FRECUENCIA -->
+    <div class="s-section hidden" id="sec-part-plan">
+      <span class="s-label">Frecuencia</span>
+      <div class="plan-pills">
+        <div class="plan-pill" data-pplan="part-2" onclick="setPlanPart('part-2')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">2 sesiones / semana</div><div class="pp-sub">$2,190 / mes · 8 hrs/mes</div></div>
+        </div>
+        <div class="plan-pill" data-pplan="part-3" onclick="setPlanPart('part-3')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">3 sesiones / semana <span class="pp-popular">popular</span></div><div class="pp-sub">$2,990 / mes · 12 hrs/mes</div></div>
+        </div>
+        <div class="plan-pill" data-pplan="part-4" onclick="setPlanPart('part-4')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">4 sesiones / semana</div><div class="pp-sub">$3,690 / mes · 16 hrs/mes</div></div>
+        </div>
+        <div class="plan-pill" data-pplan="part-grupal" onclick="setPlanPart('part-grupal')">
+          <div class="pp-radio"></div>
+          <div><div class="pp-name">Clase grupal online</div><div class="pp-sub">$790 / persona / mes · máx. 8 personas</div></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="s-divider">
+
+    <!-- PRECIO -->
+    <div class="s-section">
+      <span class="s-label">Precio</span>
+      <div class="price-row-grid">
+        <div class="price-field">
+          <label id="lbl-precio">Por persona / mes</label>
+          <div class="price-wrap">
+            <span class="cur">$</span>
+            <input class="price-input" id="f-precio" type="number" value="2490" min="0" step="10" oninput="save();upd()">
+          </div>
+        </div>
+        <div class="price-field" id="sec-personas">
+          <label>Personas</label>
+          <input class="price-input price-input-bare" id="f-personas" type="number" value="1" min="1" max="200" oninput="save();upd()">
+        </div>
+      </div>
+      <div class="price-field" id="sec-frec" style="margin-top:7px">
+        <label>Frecuencia</label>
+        <select class="s-input s-mono" id="f-frec" onchange="save();upd()">
+          <option value="1">1 sesión/sem</option>
+          <option value="2" selected>2 sesiones/sem</option>
+          <option value="3">3 sesiones/sem</option>
+          <option value="4">4 sesiones/sem</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="s-divider">
+
+    <!-- DURACIÓN -->
+    <div class="s-section">
+      <span class="s-label">Duración del programa</span>
+      <div class="dur-grid">
+        <button class="dur-btn" data-d="3" onclick="setDur(3)">3 m</button>
+        <button class="dur-btn on" data-d="4" onclick="setDur(4)">4 m</button>
+        <button class="dur-btn" data-d="5" onclick="setDur(5)">5 m</button>
+        <button class="dur-btn" data-d="6" onclick="setDur(6)">6 m</button>
+      </div>
+    </div>
+
+    <hr class="s-divider">
+
+    <!-- LISTA -->
+    <div class="s-section">
+      <span class="s-label">Precio de lista (tachado)</span>
+      <div class="price-wrap">
+        <span class="cur">$</span>
+        <input class="price-input" id="f-lista" type="number" value="0" min="0" step="10" oninput="save();upd()">
+      </div>
+      <div style="font-size:.62rem;color:var(--ink3);margin-top:4px;">0 = no mostrar precio tachado</div>
+    </div>
+
+    <hr class="s-divider">
+
+    <!-- DESCUENTO -->
+    <div class="s-section">
+      <span class="s-label">Descuento</span>
+      <div class="disc-row">
+        <input type="range" class="disc-slider" id="f-desc" min="0" max="50" step="1" value="0" oninput="syncDisc(this.value)">
+        <span class="disc-val" id="desc-val">0%</span>
+      </div>
+      <div style="font-size:.62rem;color:var(--ink3);margin-top:4px" id="desc-hint">Sin descuento</div>
+    </div>
+
+    <hr class="s-divider">
+
+    <!-- OPCIONES -->
+    <div class="s-section">
+      <span class="s-label">Opciones</span>
+      <div class="tog-row">
+        <div><div class="tog-lbl">IVA (16%)</div></div>
+        <div class="tog" id="tog-iva" onclick="togOpt('iva')"></div>
+      </div>
+      <div class="tog-row">
+        <div><div class="tog-lbl">Precio con vigencia</div><div class="tog-sub">Activa fecha límite</div></div>
+        <div class="tog" id="tog-vig" onclick="togOpt('vig')"></div>
+      </div>
+      <div id="vig-opts" class="hidden">
+        <div class="vig-grid">
+          <button class="vig-btn on" data-d="5" onclick="setVig(5)">5 días</button>
+          <button class="vig-btn" data-d="10" onclick="setVig(10)">10 días</button>
+          <button class="vig-btn" data-d="15" onclick="setVig(15)">15 días</button>
+          <button class="vig-btn" data-d="30" onclick="setVig(30)">30 días</button>
+        </div>
+      </div>
+      <div class="tog-row" id="tog-diag-row">
+        <div><div class="tog-lbl">Diagnóstico gratuito</div><div class="tog-sub">Aparece en la propuesta</div></div>
+        <div class="tog on" id="tog-diag" onclick="togOpt('diag')"></div>
+      </div>
+    </div>
+
+    <hr class="s-divider">
+
+    <div class="sidebar-total">
+      <div class="st-label" id="st-label">Total grupo / mes</div>
+      <div class="st-val" id="sidebar-total">$—</div>
+      <div class="st-sub" id="sidebar-sub">—</div>
+    </div>
+
+    <div class="bottom-btns">
+      <button class="gen-btn" onclick="generarPDF()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar propuesta PDF
+      </button>
+      <button class="copy-btn" onclick="copiarResumen()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copiar resumen
+      </button>
+      <button class="reset-btn" onclick="nuevaCotizacion()">↺ Nueva cotización</button>
+      <div class="print-hint">Activa "Gráficos de fondo" al imprimir</div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="preview-label">Vista previa</div>
+    <div class="cot-card">
+
+      <div class="cc-hdr">
+        <div>
+          <div class="cc-logo">GT<em> English</em> Training</div>
+          <div class="cc-tagline">Celaya, Guanajuato · gabrielturner.com · 461 147 2119</div>
+        </div>
+        <div class="cc-hdr-r">
+          <div class="cc-doc-lbl" id="prev-doc-lbl">Propuesta Corporativa · 2026</div>
+          <div class="cc-num" id="prev-num"></div>
+          <div class="cc-empresa" id="prev-empresa">Empresa</div>
+          <div class="cc-contacto" id="prev-contacto">Contacto</div>
+          <div class="cc-fecha" id="prev-fecha">—</div>
+        </div>
+      </div>
+
+      <div class="cc-strip">
+        <div class="cc-strip-l" id="prev-strip-l">—</div>
+        <div class="cc-strip-r" id="prev-strip-r">—</div>
+      </div>
+
+      <div class="cc-body">
+
+        <div class="price-hero">
+          <div class="ph-left">
+            <div class="ph-badge" id="prev-badge">—</div>
+            <div class="ph-plan" id="prev-plan">—</div>
+            <div class="ph-sub" id="prev-plan-sub">—</div>
+          </div>
+          <div class="ph-right">
+            <div class="ph-was" id="prev-was">&nbsp;</div>
+            <div class="ph-price">
+              <span class="ph-cur">$</span>
+              <span class="ph-num" id="prev-precio">—</span>
+              <span class="ph-unit" id="prev-ph-unit">/persona/mes</span>
+            </div>
+            <div id="prev-vig-tag"></div>
+          </div>
+        </div>
+
+        <div class="desc-badge hidden" id="prev-desc">
+          <span>🏷️</span>
+          <span class="desc-text" id="prev-desc-text">—</span>
+        </div>
+
+        <div class="cc-breakdown">
+          <div class="bk-item">
+            <div class="bk-lbl" id="prev-bk-xper-lbl">Por persona / mes</div>
+            <div class="bk-val gold" id="prev-bk-xper">—</div>
+            <div class="bk-sub" id="prev-bk-xper-sub">sin IVA</div>
+          </div>
+          <div class="bk-item">
+            <div class="bk-lbl" id="prev-bk-mes-lbl">Total grupo / mes</div>
+            <div class="bk-val" id="prev-bk-mes">—</div>
+            <div class="bk-sub" id="prev-bk-mes-sub">sin IVA</div>
+          </div>
+          <div class="bk-item">
+            <div class="bk-lbl" id="prev-bk-ciclo-lbl">Ciclo completo · 4 meses</div>
+            <div class="bk-val green" id="prev-bk-ciclo">—</div>
+            <div class="bk-sub" id="prev-bk-ciclo-sub">1 nivel completo</div>
+          </div>
+        </div>
+
+        <div class="iva-nota hidden" id="prev-iva">
+          <strong>+IVA:&nbsp;</strong><span id="prev-iva-text">—</span>
+        </div>
+
+        <div class="cc-sec">Incluido sin costo adicional</div>
+        <div class="includes-grid" id="prev-includes"></div>
+
+        <div class="social-proof">
+          <div class="sp-num">20+</div>
+          <div class="sp-divider"></div>
+          <div class="sp-text"><strong>Empresas industriales activas</strong><br>en el Bajío y zona centro de México.</div>
+          <div class="sp-divider"></div>
+          <div class="sp-num">31</div>
+          <div class="sp-divider"></div>
+          <div class="sp-text"><strong>Referencias verificadas</strong><br>en LinkedIn. Sin contratos forzosos.</div>
+        </div>
+
+        <div class="cc-sec">Cómo funciona</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-label">Diagnóstico</div><div class="step-sub">30 min · gratuito</div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-label">Programa a la medida</div><div class="step-sub">Diseñado para tu equipo</div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-label">Hablan desde clase 1</div><div class="step-sub">Sin gramática aburrida</div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-label">Reporte mensual</div><div class="step-sub">Avance por colaborador</div></div>
+        </div>
+
+        <div class="cta-close">
+          <div>
+            <div class="cta-text">¿Siguiente paso? Diagnóstico gratuito de 30 minutos.</div>
+            <div class="cta-sub">Sin compromiso. Agenda por WhatsApp o llamada directa.</div>
+          </div>
+          <div class="qr-col">
+            <div class="qr-wrap" id="prev-qr"></div>
+            <div class="qr-lbl" style="font-size:.55rem;color:rgba(255,255,255,.5);font-family:'DM Mono',monospace;margin-top:3px;">WhatsApp</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="cc-footer">
+        <div>
+          <div class="cc-foot-brand">GT<em> English</em> Training</div>
+          <div class="cc-foot-contact">gabrielturner.com · 461 147 2119 · Celaya, Guanajuato</div>
+        </div>
+        <div class="qr-col">
+          <div class="qr-wrap" id="prev-qr-ft"></div>
+          <div class="qr-lbl">WhatsApp directo</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="nota-wrap">
+      <div class="nota-lbl">🔒 Nota interna (no sale en el PDF)</div>
+      <textarea class="nota-ta" id="nota-interna" placeholder="Contexto de la negociación, objeciones, próximos pasos..." oninput="save()"></textarea>
+    </div>
+  </main>
+</div>
+
+<!-- PDF PAGE -->
+<div id="pdf-page" style="display:none">
+
+  <div class="pp-hdr">
+    <div>
+      <div class="pp-logo">GT<em> English</em> Training</div>
+      <div class="pp-tagline">Celaya, Guanajuato · gabrielturner.com · 461 147 2119</div>
+    </div>
+    <div class="pp-hdr-r">
+      <div class="pp-doc-lbl" id="pdf-doc-lbl">Propuesta Corporativa · 2026</div>
+      <div class="pp-num" id="pdf-num"></div>
+      <div class="pp-empresa" id="pdf-empresa">—</div>
+      <div class="pp-contacto" id="pdf-contacto">—</div>
+      <div class="pp-fecha" id="pdf-fecha">—</div>
+    </div>
+  </div>
+
+  <div class="pp-strip">
+    <div class="pp-strip-l" id="pdf-strip-l">—</div>
+    <div class="pp-strip-r" id="pdf-strip-r">—</div>
+  </div>
+
+  <div class="pp-body">
+
+    <div class="pp-hero">
+      <div>
+        <div class="pp-badge" id="pdf-badge">—</div>
+        <div class="pp-plan" id="pdf-plan">—</div>
+        <div class="pp-plan-sub" id="pdf-plan-sub">—</div>
+      </div>
+      <div class="pp-price-r">
+        <div class="pp-was" id="pdf-was">&nbsp;</div>
+        <div class="pp-price-unit" id="pdf-price-unit">precio por persona / mes</div>
+        <div class="pp-price-row">
+          <span class="pp-cur">$</span>
+          <span class="pp-price-big" id="pdf-precio">—</span>
+        </div>
+        <div id="pdf-vig-tag"></div>
+      </div>
+    </div>
+
+    <div class="pp-desc hidden" id="pdf-desc">
+      <span style="font-size:9pt">🏷️</span>
+      <span class="pp-desc-text" id="pdf-desc-text">—</span>
+    </div>
+
+    <div class="pp-bk">
+      <div class="pp-bk-item">
+        <div class="pp-bk-lbl" id="pdf-bk-xper-lbl">Por persona / mes</div>
+        <div class="pp-bk-val pp-bk-val-gold" id="pdf-bk-xper">—</div>
+        <div class="pp-bk-sub" id="pdf-bk-xper-sub">sin IVA</div>
+      </div>
+      <div class="pp-bk-item">
+        <div class="pp-bk-lbl" id="pdf-bk-mes-lbl">Total grupo / mes</div>
+        <div class="pp-bk-val" id="pdf-bk-mes">—</div>
+        <div class="pp-bk-sub" id="pdf-bk-mes-sub">sin IVA</div>
+      </div>
+      <div class="pp-bk-item">
+        <div class="pp-bk-lbl" id="pdf-bk-ciclo-lbl">Ciclo completo · 4 meses</div>
+        <div class="pp-bk-val pp-bk-val-green" id="pdf-bk-ciclo">—</div>
+        <div class="pp-bk-sub" id="pdf-bk-ciclo-sub">1 nivel completo</div>
+      </div>
+    </div>
+
+    <div class="pp-iva hidden" id="pdf-iva">
+      <strong>+IVA (16%):&nbsp;</strong><span id="pdf-iva-text">—</span>
+    </div>
+
+    <div class="pp-sec">Incluido sin costo adicional</div>
+    <div class="pp-includes" id="pdf-includes"></div>
+
+    <div class="pp-social">
+      <div class="pp-sp-num">20+</div>
+      <div class="pp-sp-div"></div>
+      <div class="pp-sp-text"><strong>Empresas industriales activas</strong><br>en el Bajío y zona centro de México.</div>
+      <div class="pp-sp-div"></div>
+      <div class="pp-sp-num">31</div>
+      <div class="pp-sp-div"></div>
+      <div class="pp-sp-text"><strong>Referencias verificadas en LinkedIn.</strong><br>Sin contratos forzosos. Sin inscripción anual.</div>
+    </div>
+
+    <div class="pp-sec">Cómo funciona</div>
+    <div class="pp-steps">
+      <div class="pp-step"><div class="pp-step-num">1</div><div class="pp-step-lbl">Diagnóstico</div><div class="pp-step-sub">30 min · gratuito</div></div>
+      <div class="pp-step"><div class="pp-step-num">2</div><div class="pp-step-lbl">Programa a la medida</div><div class="pp-step-sub">Diseñado para ti</div></div>
+      <div class="pp-step"><div class="pp-step-num">3</div><div class="pp-step-lbl">Hablas desde clase 1</div><div class="pp-step-sub">Sin gramática aburrida</div></div>
+      <div class="pp-step"><div class="pp-step-num">4</div><div class="pp-step-lbl">Avance constante</div><div class="pp-step-sub">Plan personalizado</div></div>
+    </div>
+
+    <div class="pp-cta">
+      <div>
+        <div class="pp-cta-text">¿Siguiente paso? Diagnóstico gratuito de 30 minutos.</div>
+        <div class="pp-cta-sub">Sin compromiso · Agenda por WhatsApp o llamada directa · 461 147 2119</div>
+      </div>
+      <div class="pp-cta-r">
+        <div class="pp-qr-wrap" id="pdf-qr"></div>
+        <div class="pp-qr-lbl">WhatsApp directo</div>
+      </div>
+    </div>
+
+    <div class="pp-cond">
+      <div class="pp-cond-text" id="pdf-cond">—</div>
+    </div>
+
+  </div>
+
+  <div class="pp-footer">
+    <div>
+      <div class="pp-foot-brand">GT<em> English</em> Training</div>
+      <div class="pp-foot-contact">gabrielturner.com · 461 147 2119 · Celaya, Guanajuato</div>
+    </div>
+    <div class="pp-qr-col">
+      <div class="pp-qr-wrap-ft" id="pdf-qr-ft"></div>
+      <div class="pp-qr-lbl-ft">WhatsApp directo</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── DATOS ── */
+const planesCorp = {
+  '1a1':        { badge:'⭐ Recomendado',  name:'Clases 1 a 1',           sub:'Online · por colaborador · sin inscripción' },
+  'grupal':     { badge:'Por volumen',     name:'Grupal corporativo',      sub:'Online · 2 ses/sem · precio por persona' },
+  'presencial': { badge:'📍 In-company',  name:'Presencial corporativo',  sub:'Instalaciones del cliente · incluye viáticos' },
+  'mixto':      { badge:'⚡ Híbrido',     name:'Programa mixto',          sub:'Online + presencial · modelo flexible' },
+};
+const planesPart = {
+  'part-2':      { badge:'Individual · Online', name:'2 sesiones / semana',  sub:'8 hrs/mes · horario flexible · entre semana',      precio:2190, inscripcion:350 },
+  'part-3':      { badge:'⭐ Más popular',      name:'3 sesiones / semana',  sub:'12 hrs/mes · horario flexible · entre semana',     precio:2990, inscripcion:350 },
+  'part-4':      { badge:'Intensivo · Online',  name:'4 sesiones / semana',  sub:'16 hrs/mes · horario flexible · entre semana',     precio:3690, inscripcion:350 },
+  'part-grupal': { badge:'Grupal · Online',     name:'Clase grupal online',  sub:'Máx. 8 personas · 2 ses/sem · 8 hrs/mes',         precio:790,  inscripcion:250 },
+};
+const frecLabels = {'1':'1 ses/sem','2':'2 ses/sem','3':'3 ses/sem','4':'4 ses/sem'};
+
+const condCorp = {
+  '1a1':        (d,i,dur)=>`Precios por colaborador por mes${i?' más IVA (16%)':' sin IVA'}. Sin inscripción anual. Duración del programa: ${dur} meses (1 nivel).${d?' Precio especial válido '+d+' días.':''}`,
+  'grupal':     (d,i,dur)=>`Precios por persona por mes${i?' más IVA (16%)':' sin IVA'}. El grupo debe mantener el número mínimo de personas. Duración: ${dur} meses.${d?' Precio especial válido '+d+' días.':''}`,
+  'presencial': (d,i,dur)=>`Precios por persona por mes${i?' más IVA (16%)':' sin IVA'}. Viáticos por separado según distancia. Duración: ${dur} meses.${d?' Precio especial válido '+d+' días.':''}`,
+  'mixto':      (d,i,dur)=>`Precios por persona por mes${i?' más IVA (16%)':' sin IVA'}. Distribución online/presencial se define en conjunto. Duración: ${dur} meses.${d?' Precio especial válido '+d+' días.':''}`,
+};
+const condPart = {
+  'part-2':      (d,i,dur)=>`Clases particulares individuales · 2 sesiones de 1 hora por semana · 8 horas mensuales. Precio mensual${i?' más IVA (16%)':' sin IVA'}. Inscripción única $350 MXN (un solo pago). Duración recomendada: ${dur} meses.${d?' Precio especial válido '+d+' días.':''}`,
+  'part-3':      (d,i,dur)=>`Clases particulares individuales · 3 sesiones de 1 hora por semana · 12 horas mensuales. Precio mensual${i?' más IVA (16%)':' sin IVA'}. Inscripción única $350 MXN (un solo pago). Duración recomendada: ${dur} meses.${d?' Precio especial válido '+d+' días.':''}`,
+  'part-4':      (d,i,dur)=>`Clases particulares individuales · 4 sesiones de 1 hora por semana · 16 horas mensuales. Precio mensual${i?' más IVA (16%)':' sin IVA'}. Inscripción única $350 MXN (un solo pago). Duración recomendada: ${dur} meses.${d?' Precio especial válido '+d+' días.':''}`,
+  'part-grupal': (d,i,dur)=>`Clase grupal online · máximo 8 personas · 2 sesiones de 1 hora por semana · 8 horas mensuales. Precio por persona por mes${i?' más IVA (16%)':' sin IVA'}. Inscripción por persona $250 MXN (un solo pago). Grupos homogéneos por nivel. Duración recomendada: ${dur} meses.${d?' Precio especial válido '+d+' días.':''}`,
+};
+
+/* ── ESTADO ── */
+let st = { modo:'corp', plan:'1a1', planPart:'part-3', dur:4, iva:false, vig:false, diasVig:5, diag:true };
+let qrDone = false;
+const WA_URL  = 'https://wa.me/524611472119';
+const STORE_KEY = 'gt_cotizador_v3';
+
+/* ── DOM HELPERS ── */
+const $    = id => document.getElementById(id);
+const val  = id => $(id)?.value || '';
+const num  = id => parseFloat($(id)?.value) || 0;
+const set  = (id, txt) => { const e=$(id); if(e) e.textContent=txt; };
+const html = (id, txt) => { const e=$(id); if(e) e.innerHTML=txt; };
+const show = (id, vis) => { const e=$(id); if(e) e.classList.toggle('hidden',!vis); };
+const fmt  = n => '$'+Math.round(n).toLocaleString('es-MX');
+const fmtF = d => d.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+
+/* ── CÁLCULO ── */
+function calc(){
+  const base     = num('f-precio');
+  const personas = st.modo==='part' ? 1 : Math.max(1, num('f-personas'));
+  const pct      = parseInt($('f-desc').value)||0;
+  const final    = base*(1-pct/100);
+  const lista    = num('f-lista');
+  const totalMes = final*personas;
+  const totalIva = totalMes*1.16;
+  const ciclo    = totalMes*st.dur;
+  return {base,final,pct,lista,personas,totalMes,totalIva,ciclo};
+}
+
+/* ── INCLUDES HTML ── */
+function includesHTML(isPDF){
+  let items;
+  if(st.modo==='part'){
+    items = st.planPart==='part-grupal'
+      ? ['Material incluido','Diagnóstico de nivel','Grupos por nivel','Plataforma GT']
+      : ['Material incluido','Diagnóstico de nivel','Plan personalizado','Plataforma GT'];
+  } else {
+    items = ['Material de trabajo','Plataforma GT','Reportes mensuales'];
+    if(st.diag) items.push('Diagnóstico inicial');
+  }
+  if(isPDF){
+    const cols = items.length === 4 ? 4 : 3;
+    $('pdf-includes').style.gridTemplateColumns = `repeat(${cols},1fr)`;
+    return items.map(n=>`<div class="pp-inc"><div class="pp-inc-dot"></div><div class="pp-inc-name">${n}</div><div class="pp-inc-free">$0</div></div>`).join('');
+  } else {
+    return items.map(n=>`<div class="inc-item"><div class="inc-dot"></div><span class="inc-name">${n}</span><span class="inc-free">$0</span></div>`).join('');
+  }
+}
+
+/* ── RENDER (compartido preview/PDF) ── */
+function render(p, isPDF){
+  const isPart   = st.modo==='part';
+  const empresa  = val('f-empresa')||(isPDF?'Cliente':'Nombre del cliente');
+  const contacto = val('f-contacto')||'Contacto';
+  const cotNum   = val('f-num');
+  const frec     = isPart
+    ? planesPart[st.planPart].sub.split('·')[0].trim()
+    : frecLabels[val('f-frec')||'2'];
+  const {final,pct,lista,personas,totalMes,totalIva,ciclo} = calc();
+  const pl       = isPart ? planesPart[st.planPart] : planesCorp[st.plan];
+  const hoy      = new Date();
+  const limite   = new Date(hoy); limite.setDate(limite.getDate()+st.diasVig);
+
+  set(p+'doc-lbl', isPart?'Propuesta Personal · 2026':'Propuesta Corporativa · 2026');
+  set(p+'empresa',  empresa);
+  set(p+'contacto', contacto);
+  set(p+'fecha',    fmtF(hoy));
+  set(p+'num',      cotNum);
+  html(p+'strip-l', `Propuesta preparada para <strong>${empresa}</strong>`);
+  set(p+'strip-r',  st.iva?'Precios + IVA (16%)':'Precios sin IVA');
+
+  set(p+'badge',    pl.badge);
+  set(p+'plan',     pl.name);
+  set(p+'plan-sub', isPart ? pl.sub : pl.sub+' · '+frec);
+  set(p+'was',      lista>0?fmt(lista)+(isPart?' / mes':' / persona / mes'):'');
+  set(p+'precio',   Math.round(final).toLocaleString('es-MX'));
+
+  if(isPDF){
+    set('pdf-price-unit', isPart?'precio por mes':'precio por persona / mes');
+  } else {
+    set('prev-ph-unit', isPart?'/mes':'/persona/mes');
+  }
+
+  const vigClass = isPDF?'pp-vig':'ph-vig';
+  const vigTxt   = isPDF
+    ? `✓ Precio especial — válido hasta ${fmtF(limite)}`
+    : `✓ Precio especial — válido ${st.diasVig} días`;
+  html(p+'vig-tag', st.vig?`<div class="${vigClass}">${vigTxt}</div>`:'');
+
+  show(p+'desc', pct>0);
+  if(pct>0) html(p+'desc-text', `Descuento aplicado: <strong>−${pct}%</strong> · Precio final: <strong>${fmt(final)}${isPart?' / mes':' / persona / mes'}</strong>`);
+
+  /* DESGLOSE */
+  set(p+'bk-xper-lbl', isPart?'Por mes':'Por persona / mes');
+  set(p+'bk-xper',     fmt(final));
+  set(p+'bk-xper-sub', st.iva?`(${fmt(final*1.16)} con IVA)`:'sin IVA');
+
+  if(isPart){
+    set(p+'bk-mes-lbl', 'Inscripción única');
+    set(p+'bk-mes',     '$'+pl.inscripcion);
+    set(p+'bk-mes-sub', 'pago único · MXN');
+    set(p+'bk-ciclo-lbl', `Total ${st.dur} meses`);
+    set(p+'bk-ciclo',   fmt(ciclo));
+    set(p+'bk-ciclo-sub','+ $350 inscripción');
+  } else {
+    set(p+'bk-mes-lbl', 'Total grupo / mes');
+    set(p+'bk-mes',     fmt(totalMes));
+    set(p+'bk-mes-sub', st.iva?`(${fmt(totalIva)} con IVA)`:'sin IVA');
+    set(p+'bk-ciclo-lbl',`Ciclo completo · ${st.dur} meses`);
+    set(p+'bk-ciclo',   fmt(ciclo));
+    set(p+'bk-ciclo-sub','1 nivel completo');
+  }
+
+  show(p+'iva', st.iva);
+  if(st.iva){
+    const ivaTxt = isPart
+      ? `Con IVA: ${fmt(final*1.16)} / mes`
+      : `Total grupo con IVA: ${fmt(totalIva)} / mes para ${personas} colaborador${personas>1?'es':''}.`;
+    set(p+'iva-text', ivaTxt);
+  }
+
+  html(p+'includes', includesHTML(isPDF));
+
+  if(isPDF){
+    const condFn = isPart ? condPart[st.planPart] : condCorp[st.plan];
+    html('pdf-cond', condFn(st.vig?st.diasVig:0, st.iva, st.dur));
+  }
+}
+
+/* ── UPDATE PREVIEW ── */
+function upd(){
+  render('prev-', false);
+
+  const isPart = st.modo==='part';
+  const {final,personas,totalMes,totalIva} = calc();
+  const pct = parseInt($('f-desc').value)||0;
+
+  set('st-label',    isPart?'Total mensual':'Total grupo / mes');
+  set('sidebar-total', fmt(st.iva?(isPart?final*1.16:totalIva):(isPart?final:totalMes)));
+  set('sidebar-sub',   isPart
+    ? (st.iva?'con IVA':'sin IVA')
+    : `${personas} persona${personas>1?'s':''} · ${st.iva?'con IVA':'sin IVA'}`);
+
+  $('desc-hint').textContent = pct>0
+    ? `Precio final: ${fmt(final)}${isPart?' / mes':' / persona / mes'}`
+    : 'Sin descuento';
+  $('desc-val').textContent = pct+'%';
+
+  const sl = $('f-desc');
+  sl.style.setProperty('--val', sl.value+'%');
+
+  if(!qrDone){
+    new QRCode($('prev-qr'),    {text:WA_URL,width:42,height:42,colorDark:'#0c1a30',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    new QRCode($('prev-qr-ft'), {text:WA_URL,width:42,height:42,colorDark:'#0c1a30',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    qrDone = true;
+  }
+}
+
+/* ── CONTROLES ── */
+function setModo(m){
+  st.modo = m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  show('sec-corp-plan', m==='corp');
+  show('sec-part-plan', m==='part');
+  show('sec-personas',  m==='corp');
+  show('sec-frec',      m==='corp');
+  show('tog-diag-row',  m==='corp');
+  $('lbl-cliente').textContent = m==='part'?'Nombre':'Empresa';
+  $('lbl-precio').textContent  = m==='part'?'Por mes':'Por persona / mes';
+  if(m==='part'){
+    $('f-precio').value = planesPart[st.planPart].precio;
+    document.querySelectorAll('[data-pplan]').forEach(el=>el.classList.toggle('active',el.dataset.pplan===st.planPart));
+  }
+  save(); upd();
+}
+
+function setPlan(p){
+  st.plan = p;
+  document.querySelectorAll('[data-plan]').forEach(el=>el.classList.toggle('active',el.dataset.plan===p));
+  save(); upd();
+}
+
+function setPlanPart(p){
+  st.planPart = p;
+  document.querySelectorAll('[data-pplan]').forEach(el=>el.classList.toggle('active',el.dataset.pplan===p));
+  $('f-precio').value = planesPart[p].precio;
+  save(); upd();
+}
+
+function setDur(d){
+  st.dur = d;
+  document.querySelectorAll('.dur-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.d)===d));
+  save(); upd();
+}
+
+function syncDisc(v){
+  $('f-desc').style.setProperty('--val', v+'%');
+  save(); upd();
+}
+
+function togOpt(k){
+  st[k]=!st[k];
+  $('tog-'+k).classList.toggle('on',st[k]);
+  if(k==='vig') show('vig-opts', st[k]);
+  save(); upd();
+}
+
+function setVig(d){
+  st.diasVig=d;
+  document.querySelectorAll('.vig-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.d)===d));
+  save(); upd();
+}
+
+/* ── PDF ── */
+function generarPDF(){
+  render('pdf-', true);
+  $('pdf-qr').innerHTML='';
+  new QRCode($('pdf-qr'),    {text:WA_URL,width:56,height:56,colorDark:'#0c1a30',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  $('pdf-qr-ft').innerHTML='';
+  new QRCode($('pdf-qr-ft'), {text:WA_URL,width:44,height:44,colorDark:'#0c1a30',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  $('pdf-page').style.display='block';
+  setTimeout(()=>{ window.print(); setTimeout(()=>{ $('pdf-page').style.display='none'; },800); },400);
+}
+
+/* ── COPIAR RESUMEN ── */
+function copiarResumen(){
+  const isPart = st.modo==='part';
+  const {final,personas,totalMes,totalIva,ciclo} = calc();
+  const empresa  = val('f-empresa')||'Cliente';
+  const contacto = val('f-contacto');
+  const cotNum   = val('f-num');
+  const pl = isPart ? planesPart[st.planPart] : planesCorp[st.plan];
+  const totalLabel = st.iva ? fmt(isPart?final*1.16:totalIva)+' (con IVA)' : fmt(isPart?final:totalMes)+' (sin IVA)';
+  const lines = [
+    'GT English Training — '+(isPart?'Propuesta Personal':'Propuesta Corporativa')+' 2026',
+    cotNum?`Cotización: ${cotNum}`:'',
+    `Cliente: ${empresa}${contacto?' · '+contacto:''}`,
+    '─'.repeat(40),
+    `Plan: ${pl.name}`,
+    `Precio/mes: ${fmt(final)}${isPart?'':' por persona'}`,
+    isPart?'Inscripción única: $350 MXN':`Personas: ${personas}`,
+    `Total mensual: ${totalLabel}`,
+    `Ciclo (${st.dur} m): ${fmt(ciclo)}`,
+    st.vig?`Vigencia: ${st.diasVig} días`:'',
+    '─'.repeat(40),
+    'gabrielturner.com · 461 147 2119 · Celaya, Gto.',
+  ].filter(Boolean).join('\n');
+  navigator.clipboard.writeText(lines)
+    .then(()=>toast('Resumen copiado al portapapeles'))
+    .catch(()=>toast('No se pudo copiar'));
+}
+
+function nuevaCotizacion(){
+  if(!confirm('¿Limpiar todos los datos y empezar una nueva cotización?')) return;
+  localStorage.removeItem(STORE_KEY);
+  location.reload();
+}
+
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ── NÚMERO AUTO ── */
+function genQuoteNum(){
+  const year=new Date().getFullYear(), key=`gt_seq_${year}`;
+  const seq=(parseInt(localStorage.getItem(key)||'0')+1);
+  localStorage.setItem(key,seq);
+  return `GT-${year}-${String(seq).padStart(3,'0')}`;
+}
+
+/* ── PERSISTENCIA ── */
+function save(){
+  try{
+    localStorage.setItem(STORE_KEY,JSON.stringify({
+      empresa:val('f-empresa'), contacto:val('f-contacto'), num:val('f-num'),
+      nota:val('nota-interna'), precio:val('f-precio'), personas:val('f-personas'),
+      frec:val('f-frec'), lista:val('f-lista'), desc:$('f-desc').value,
+      modo:st.modo, plan:st.plan, planPart:st.planPart, dur:st.dur,
+      iva:st.iva, vig:st.vig, diasVig:st.diasVig, diag:st.diag,
+    }));
+  }catch(e){}
+}
+
+function load(){
+  let s; try{ s=JSON.parse(localStorage.getItem(STORE_KEY)); }catch(e){}
+  if(!s){ $('f-num').value=genQuoteNum(); return; }
+
+  if(s.empresa)  $('f-empresa').value=s.empresa;
+  if(s.contacto) $('f-contacto').value=s.contacto;
+  if(s.num)      $('f-num').value=s.num;
+  if(s.nota)     $('nota-interna').value=s.nota;
+  if(s.precio)   $('f-precio').value=s.precio;
+  if(s.personas) $('f-personas').value=s.personas;
+  if(s.frec)     $('f-frec').value=s.frec;
+  if(s.lista)    $('f-lista').value=s.lista;
+  if(s.desc){    $('f-desc').value=s.desc; $('f-desc').style.setProperty('--val',s.desc+'%'); }
+
+  if(s.plan){ st.plan=s.plan; document.querySelectorAll('[data-plan]').forEach(el=>el.classList.toggle('active',el.dataset.plan===s.plan)); }
+  if(s.planPart){ st.planPart=s.planPart; document.querySelectorAll('[data-pplan]').forEach(el=>el.classList.toggle('active',el.dataset.pplan===s.planPart)); }
+  if(s.dur){ st.dur=s.dur; document.querySelectorAll('.dur-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.d)===s.dur)); }
+  if(s.iva  !==undefined){ st.iva=s.iva;   $('tog-iva').classList.toggle('on',st.iva); }
+  if(s.vig  !==undefined){ st.vig=s.vig;   $('tog-vig').classList.toggle('on',st.vig); show('vig-opts',st.vig); }
+  if(s.diag !==undefined){ st.diag=s.diag; $('tog-diag').classList.toggle('on',st.diag); }
+  if(s.diasVig){ st.diasVig=s.diasVig; document.querySelectorAll('.vig-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.d)===s.diasVig)); }
+  if(s.modo) setModo(s.modo);
+}
+
+/* ── INIT ── */
+load();
+upd();
+</script>
+</body>
+</html>
